@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Premium independent ecommerce storefront">
+  <meta name="theme-color" content="#0b0b10">
+  <title>YOUR BRAND — Premium Essentials</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="announcement">Free shipping across India • Secure checkout • Easy support</div>
+
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="YOUR BRAND home">YOUR<span>BRAND</span></a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#home">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#why">Why us</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="icon-btn" id="cartButton" aria-label="Open shopping cart">
+      Cart <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-copy">
+        <p class="eyebrow">SMARTER EVERYDAY LIVING</p>
+        <h1>Products that make everyday life <em>better.</em></h1>
+        <p class="hero-text">Thoughtfully selected essentials, delivered across India with a clean, premium shopping experience.</p>
+        <a class="btn btn-primary" href="#shop">Shop now <span>→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="hero-card">
+          <span>FEATURED</span>
+          <strong id="heroProductName">Your featured product</strong>
+          <b id="heroProductPrice">₹0</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Store benefits">
+      <div><strong>✓</strong><span>Quality-selected products</span></div>
+      <div><strong>↯</strong><span>Fast pan-India delivery</span></div>
+      <div><strong>⌁</strong><span>Secure payment options</span></div>
+      <div><strong>◌</strong><span>Responsive customer support</span></div>
+    </section>
+
+    <section class="section" id="shop">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">SHOP</p>
+          <h2>Featured product</h2>
+        </div>
+        <span class="muted">Curated for everyday use</span>
+      </div>
+      <div id="productGrid" class="product-grid"></div>
+    </section>
+
+    <section class="section split" id="why">
+      <div>
+        <p class="eyebrow">WHY US</p>
+        <h2>Simple shopping.<br>Better products.</h2>
+      </div>
+      <div class="feature-list">
+        <article><span>01</span><div><h3>Curated selection</h3><p>We focus on useful products instead of filling the store with unnecessary choices.</p></div></article>
+        <article><span>02</span><div><h3>Clear pricing</h3><p>No confusing supplier names or third-party marketplace presentation during shopping.</p></div></article>
+        <article><span>03</span><div><h3>India-focused delivery</h3><p>Shipping information is presented clearly for customers ordering within India.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section review-section">
+      <div class="section-head">
+        <div><p class="eyebrow">CUSTOMER LOVE</p><h2>What shoppers say</h2></div>
+      </div>
+      <div class="reviews">
+        <article><div class="stars">★★★★★</div><p>“The ordering experience was simple and the product arrived just as expected.”</p><strong>Verified customer</strong></article>
+        <article><div class="stars">★★★★★</div><p>“Clean website, easy checkout and quick communication.”</p><strong>Verified customer</strong></article>
+        <article><div class="stars">★★★★★</div><p>“I liked that the product details and shipping information were easy to find.”</p><strong>Verified customer</strong></article>
+      </div>
+      <p class="review-note">Replace these example reviews with genuine customer reviews before publishing them as customer testimonials.</p>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="section-head"><div><p class="eyebrow">FAQ</p><h2>Questions, answered.</h2></div></div>
+      <details><summary>How long does delivery take?</summary><p>Show your actual delivery estimate here once your fulfillment settings are confirmed.</p></details>
+      <details><summary>Which payment methods are available?</summary><p>Payment methods should be displayed from the officially supported checkout integration rather than being simulated by this website.</p></details>
+      <details><summary>How can I contact support?</summary><p>Add your real support email, phone number or WhatsApp business contact before launch.</p></details>
+      <details><summary>Can I return my order?</summary><p>Publish your actual return and refund policy here. Do not promise a policy you do not offer.</p></details>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="#home">YOUR<span>BRAND</span></a><p>Independent online store.</p></div>
+    <div><a href="#shop">Shop</a><a href="#faq">FAQ</a><a href="#">Privacy</a><a href="#">Terms</a></div>
+    <small>© <span id="year"></span> YOUR BRAND. All rights reserved.</small>
+  </footer>
+
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="drawer-head"><h2>Your cart</h2><button class="close-btn" id="closeCart">×</button></div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-summary">
+      <div><span>Subtotal</span><strong id="cartSubtotal">₹0</strong></div>
+      <button class="btn btn-primary full" id="checkoutButton">Continue to secure checkout</button>
+      <p class="tiny">Payment and final order submission are handled only through the officially supported BuySeloma checkout/integration once connected.</p>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <dialog id="productDialog" class="product-dialog">
+    <button class="close-btn dialog-close" id="closeProduct">×</button>
+    <div id="productDetails"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
