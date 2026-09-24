@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- SolveSpace India Official Favicon -->
+  <rect width="100" height="100" rx="22" fill="#0B2545"/>
+  
+  <!-- Left Hexagon Shell & Breakthrough Arrow in White -->
+  <path
+    d="M34 72L22 60V34L44 16L54 24"
+    stroke="#FFFFFF"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Arrow Shaft & Tip -->
+  <path
+    d="M28 54L38 44L48 54L80 22"
+    stroke="#FFFFFF"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M62 20H82V40"
+    stroke="#FFFFFF"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Right Hexagon Shell in Vibrant Orange -->
+  <path
+    d="M66 72L78 60V38"
+    stroke="#F58220"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Orange Lightbulb Contour & Filament -->
+  <path
+    d="M66 72C66 60 74 54 74 44C74 38 70 34 64 34"
+    stroke="#F58220"
+    stroke-width="6"
+    stroke-linecap="round"
+  />
+  
+  <!-- Lightbulb Base in Orange/White -->
+  <path
+    d="M38 80H62"
+    stroke="#F58220"
+    stroke-width="6"
+    stroke-linecap="round"
+  />
+  <path
+    d="M44 87H56"
+    stroke="#FFFFFF"
+    stroke-width="5"
+    stroke-linecap="round"
+  />
+</svg>
