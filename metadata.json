@@ -1,0 +1,6 @@
+{
+  "name": "SolveSpace India",
+  "description": "Premium e-commerce store with mobile-first UX, instantaneous pincode verification, dynamic payment gateways, and Shopify-style admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

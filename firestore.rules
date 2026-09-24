@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Products: readable by all, writeable for catalog management & admin
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Settings: readable by all, writeable for store admin configuration
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Orders: readable for order lookup & admin, creatable for guest/user checkout, updatable for tracking & status changes, protected against deletion
+    match /orders/{orderId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
+    // Pincodes: read only
+    match /pincodes/{pincodeId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Reviews: read by all, creatable, non-deletable
+    match /reviews/{reviewId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    
+    // User Profiles
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}

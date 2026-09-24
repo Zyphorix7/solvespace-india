@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "collections": [
+    {
+      "name": "products",
+      "description": "SolveSpace India product catalog",
+      "fields": {
+        "title": { "type": "string", "required": true },
+        "subtitle": { "type": "string" },
+        "price": { "type": "number", "required": true },
+        "compareAtPrice": { "type": "number" },
+        "description": { "type": "string", "required": true },
+        "images": { "type": "array", "required": true },
+        "category": { "type": "string", "required": true },
+        "inventory": { "type": "number", "required": true },
+        "variants": { "type": "array" },
+        "features": { "type": "array" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "orders",
+      "description": "Customer orders and fulfillment status",
+      "fields": {
+        "orderNumber": { "type": "string", "required": true },
+        "customer": { "type": "map", "required": true },
+        "items": { "type": "array", "required": true },
+        "totalAmount": { "type": "number", "required": true },
+        "paymentMethod": { "type": "string", "required": true },
+        "paymentStatus": { "type": "string", "required": true },
+        "orderStatus": { "type": "string", "required": true },
+        "pincode": { "type": "string", "required": true },
+        "shippingCity": { "type": "string" },
+        "shippingState": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "settings",
+      "description": "Store configuration including dynamic payment gateways",
+      "fields": {
+        "cashfreeEnabled": { "type": "boolean" },
+        "codEnabled": { "type": "boolean" },
+        "freeShippingThreshold": { "type": "number" },
+        "storeCurrency": { "type": "string" }
+      }
+    }
+  ]
+}
