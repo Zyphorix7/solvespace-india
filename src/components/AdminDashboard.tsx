@@ -1654,7 +1654,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <a
-                    href="/favicon.svg"
+                    href="./favicon.svg"
                     download="solvespace-india-favicon.svg"
                     className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto"
                   >

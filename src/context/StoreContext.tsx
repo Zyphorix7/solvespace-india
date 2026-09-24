@@ -218,7 +218,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search.toLowerCase();
 
-      const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
+      const isAdminPath = pathname.endsWith('/admin') || pathname.endsWith('/admin/') || pathname.includes('/admin/');
       const isAdminHash = hash === '#admin' || hash === '#/admin' || hash.startsWith('#/admin');
       const isAdminSearch = search === '?admin' || search.startsWith('?admin=') || search.includes('&admin=');
 
@@ -330,8 +330,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const closeAdminUrl = () => {
-    if (window.location.pathname.toLowerCase().startsWith('/admin')) {
-      window.history.pushState(null, '', '/');
+    if (window.location.pathname.toLowerCase().includes('/admin')) {
+      const cleanPath = window.location.pathname.replace(/\/admin(\/.*)?$/i, '') || '/';
+      window.history.pushState(null, '', cleanPath + window.location.search);
     } else if (window.location.hash.toLowerCase().includes('admin')) {
       window.location.hash = '';
     }

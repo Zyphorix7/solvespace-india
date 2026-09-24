@@ -358,7 +358,7 @@ export const BrandKitModal: React.FC<BrandKitModalProps> = ({ isOpen, onClose })
             </div>
             <div className="flex items-center gap-2">
               <a
-                href="/favicon.svg"
+                href="./favicon.svg"
                 download="solvespace-india-favicon.svg"
                 className="px-4 py-2 rounded-xl bg-[#0B2545] hover:bg-slate-900 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
               >
