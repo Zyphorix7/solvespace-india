@@ -220,7 +220,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
       const isAdminHash = hash === '#admin' || hash === '#/admin' || hash.startsWith('#/admin');
-      const isAdminSearch = search.includes('admin=true') || search.includes('admin=1') || search.includes('admin');
+      const isAdminSearch = search === '?admin' || search.startsWith('?admin=') || search.includes('&admin=');
 
       if (isAdminPath || isAdminHash || isAdminSearch) {
         setAdminOpen(true);
