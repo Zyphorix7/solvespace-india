@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { GoogleGenAI } from '@google/genai';
-import { verifyIndianPincode } from '../src/data/pincodes';
+import { verifyIndianPincode } from '../src/data/pincodes.ts';
 
 // Initialize Gemini SDK with User-Agent telemetry as mandated by guidelines
 const ai = new GoogleGenAI({

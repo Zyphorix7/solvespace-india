@@ -1,5 +1,5 @@
-import { PincodeServiceability } from '../types/index';
-import { calculateDeliveryEstimate } from '../utils/delivery';
+import { PincodeServiceability } from '../types/index.ts';
+import { calculateDeliveryEstimate } from '../utils/delivery.ts';
 
 interface KnownPincode {
   city: string;

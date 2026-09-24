@@ -10,7 +10,10 @@
       // This script takes the current url and converts the path and query
       // into just a query string, and then redirects the browser
       // to the new url with only a query string and hash fragment.
-      var pathSegmentsToKeep = 1;
+      // Automatically detect if running in a GitHub Pages repository subfolder or custom/user root domain
+      var segments = window.location.pathname.split('/').filter(Boolean);
+      var isRepoSubfolder = window.location.hostname.endsWith('github.io') && segments.length >= 1;
+      var pathSegmentsToKeep = isRepoSubfolder ? 1 : 0;
 
       var l = window.location;
       l.replace(
