@@ -109,8 +109,10 @@ const ADMIN_AUTH_KEY = 'solvespace_admin_authenticated';
 const ADMIN_PASSKEY = 'Solvespace1@%!';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [products, setProducts] = useState<Product[]>(() =>
+    SAMPLE_SOLVESPACE_PRODUCTS.map((p, idx) => ({ ...p, id: `seed_prod_${idx}` }))
+  );
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
   const [orders, setOrders] = useState<Order[]>([]);
   
