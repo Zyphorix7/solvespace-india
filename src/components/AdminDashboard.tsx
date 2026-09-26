@@ -45,7 +45,17 @@ import {
   Calendar,
   LogOut,
   Key,
+  BarChart3,
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  CartesianGrid,
+} from 'recharts';
 import { useStore } from '../context/StoreContext';
 import { Product, Order, AIInsight, OrderStatus } from '../types';
 import { SolveSpaceLogo } from './SolveSpaceLogo';
@@ -55,32 +65,31 @@ import {
   updateProductInDb,
   deleteProductFromDb,
 } from '../services/firestore';
+import { ShopifyProductEditorModal } from './ShopifyProductEditorModal';
+import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
+import { computeRealtimeAnalytics } from '../services/analytics';
 
-// Preset high-quality curated images for SolveSpace products
+// Preset high-quality real product images for SolveSpace Wireless Electric Mini Food Chopper
 const CURATED_IMAGE_PRESETS = [
   {
-    label: 'UltraDesk Organizer',
-    url: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
+    label: 'Main Product Hero (Screenshot_20260901_134903_Meesho.jpg)',
+    url: '/products/Screenshot_20260901_134903_Meesho.jpg',
   },
   {
-    label: 'GaN Travel Charger',
-    url: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=1000&q=80',
+    label: 'Detachable 4-Piece Architecture (1788250324092.png)',
+    url: '/products/1788250324092.png',
   },
   {
-    label: 'AirPure HEPA Purifier',
-    url: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1000&q=80',
+    label: '304 Stainless Steel Triple Blades (chopper-blades-precision.jpg)',
+    url: '/products/chopper-blades-precision.jpg',
   },
   {
-    label: 'Smart Monitor ScreenBar',
-    url: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?auto=format&fit=crop&w=1000&q=80',
+    label: 'Cordless USB-C Motor Head (chopper-cordless-motor.jpg)',
+    url: '/products/chopper-cordless-motor.jpg',
   },
   {
-    label: 'Nomad Tech Sling Bag',
-    url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    label: 'Ergonomic Desk Setup',
-    url: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=80',
+    label: 'Easy 5-Second Tap Water Rinsing (chopper-washable-cleaning.jpg)',
+    url: '/products/chopper-washable-cleaning.jpg',
   },
 ];
 
@@ -95,6 +104,7 @@ export const AdminDashboard: React.FC = () => {
     paymentSettings,
     updatePaymentSettings,
     seedCatalog,
+    purgeAndResetChopper,
     refreshProducts,
     refreshOrders,
     updateOrderStatus,
@@ -104,7 +114,7 @@ export const AdminDashboard: React.FC = () => {
     formatCurrency,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'settings' | 'brandkit'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'products' | 'orders' | 'settings' | 'brandkit'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationOpen, setNotificationOpen] = useState(false);
 
@@ -126,23 +136,9 @@ export const AdminDashboard: React.FC = () => {
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
 
-  // Product CMS Modal State
+  // Product CMS Modal State (Shopify Studio)
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [productForm, setProductForm] = useState({
-    title: '',
-    subtitle: '',
-    category: 'Desk & Workspace',
-    price: 1499,
-    compareAtPrice: 2499,
-    description: '',
-    inventory: 20,
-    sku: '',
-    imagesText: '',
-    tagsText: 'Ergonomic, Made For India',
-    featuresText: 'Aerospace aluminum build\n1-Year Warranty\nExpress Pan-India Delivery',
-  });
-  const [isGeneratingAiCopy, setIsGeneratingAiCopy] = useState(false);
 
   // Settings State
   const [settingsForm, setSettingsForm] = useState({
@@ -214,6 +210,11 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [selectedOrderForDetails]);
 
+  // 7-day live overview analytics for main dashboard card
+  const overviewAnalytics = useMemo(() => {
+    return computeRealtimeAnalytics(orders, products, '7d');
+  }, [orders, products]);
+
   if (!adminOpen) return null;
 
   // Filtered Products
@@ -274,154 +275,27 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Open Product Modal
+  // Open Product Modal (Shopify Studio)
   const openNewProductModal = () => {
     setEditingProduct(null);
-    setProductForm({
-      title: '',
-      subtitle: '',
-      category: 'Desk & Workspace',
-      price: 1999,
-      compareAtPrice: 2999,
-      description: '',
-      inventory: 25,
-      sku: `SS-${Math.floor(100 + Math.random() * 900)}`,
-      imagesText: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
-      tagsText: 'Ergonomic, Workspace, SolveSpace',
-      featuresText: 'High grade material\nEngineered for India\n1-Year Replacement Warranty',
-    });
     setIsProductModalOpen(true);
   };
 
   const openEditProductModal = (prod: Product) => {
     setEditingProduct(prod);
-    setProductForm({
-      title: prod.title,
-      subtitle: prod.subtitle || '',
-      category: prod.category,
-      price: prod.price,
-      compareAtPrice: prod.compareAtPrice || prod.price * 1.4,
-      description: prod.description,
-      inventory: prod.inventory,
-      sku: prod.sku || '',
-      imagesText: prod.images.join('\n'),
-      tagsText: prod.tags?.join(', ') || '',
-      featuresText: prod.features?.join('\n') || '',
-    });
     setIsProductModalOpen(true);
   };
 
-  // AI Description Generator for Product CMS
-  const handleGenerateProductCopy = async () => {
-    if (!productForm.title) {
-      showToast('Please enter a product title first to generate AI copy.', 'info');
-      return;
-    }
-    setIsGeneratingAiCopy(true);
-    const copy = await generateProductCopy(productForm.title, productForm.category);
-    if (copy) {
-      setProductForm((prev) => ({
-        ...prev,
-        subtitle: copy.subtitle || prev.subtitle,
-        description: copy.description || prev.description,
-        featuresText: copy.features ? copy.features.join('\n') : prev.featuresText,
-        tagsText: copy.tags ? copy.tags.join(', ') : prev.tagsText,
-        price: copy.suggestedPrice || prev.price,
-        compareAtPrice: copy.suggestedCompareAtPrice || prev.compareAtPrice,
-      }));
-      showToast('Generated product description with Gemini AI!', 'success');
-    }
-    setIsGeneratingAiCopy(false);
-  };
-
-  // Safe client-side image downscaling to prevent Firestore 1MB limits
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 800;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-            setProductForm((prev) => ({
-              ...prev,
-              imagesText: prev.imagesText ? `${prev.imagesText}\n${compressedDataUrl}` : compressedDataUrl,
-            }));
-            showToast('Optimized image added to product', 'success');
-          }
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // Save product in CMS
-  const handleSaveProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const images = productForm.imagesText
-      .split('\n')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const features = productForm.featuresText
-      .split('\n')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const tags = productForm.tagsText
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const payload: Omit<Product, 'id'> = {
-      title: productForm.title,
-      subtitle: productForm.subtitle,
-      category: productForm.category,
-      price: Number(productForm.price),
-      compareAtPrice: Number(productForm.compareAtPrice),
-      description: productForm.description,
-      inventory: Number(productForm.inventory),
-      sku: productForm.sku,
-      images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80'],
-      features,
-      tags,
-      rating: editingProduct?.rating || 4.9,
-      reviewCount: editingProduct?.reviewCount || 1,
-    };
-
-    try {
-      if (editingProduct) {
-        await updateProductInDb(editingProduct.id, payload);
-        showToast('Product updated successfully in Firestore', 'success');
-      } else {
-        await addProductToDb(payload);
-        showToast('New product added to SolveSpace India catalog', 'success');
-      }
-      setIsProductModalOpen(false);
-      await refreshProducts();
-    } catch (err) {
-      console.error(err);
-      showToast('Error saving product to database', 'error');
+  const handleSaveProduct = async (payload: Omit<Product, 'id'>, existingId?: string) => {
+    if (existingId) {
+      await updateProductInDb(existingId, payload);
+    } else {
+      await addProductToDb(payload);
     }
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    await refreshProducts();
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -490,6 +364,13 @@ export const AdminDashboard: React.FC = () => {
             <nav className="flex md:flex-col items-center md:items-stretch gap-1.5 w-full overflow-x-auto md:overflow-visible pb-1 md:pb-0 no-scrollbar">
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
+                {
+                  id: 'analytics',
+                  label: 'Real-Time Analytics',
+                  icon: BarChart3,
+                  badge: 'Live',
+                  badgeColor: 'bg-emerald-500 text-white',
+                },
                 { id: 'products', label: 'Products Catalog', icon: Package, badge: products.length },
                 {
                   id: 'orders',
@@ -848,64 +729,80 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* REVENUE TREND & LOW STOCK SPLIT */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                  {/* Revenue Trend Line Chart */}
+                  {/* Revenue Trend Line Chart (Live Recharts) */}
                   <div className="lg:col-span-8 p-5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-900">
-                          SolveSpace Revenue Trajectory (₹ INR)
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-extrabold text-slate-900">
+                            Daily Sales & Revenue Trajectory (₹ INR)
+                          </h3>
+                          <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Live 7-Day
+                          </span>
+                        </div>
                         <p className="text-xs text-slate-400">
-                          Direct-to-Consumer Pan-India sales across desk & tech hardware
+                          Direct-to-Consumer Pan-India daily sales computed from verified orders
                         </p>
                       </div>
-                      <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-600">
-                        FY 2026-27
-                      </span>
+                      <button
+                        onClick={() => setActiveTab('analytics')}
+                        className="px-3 py-1.5 bg-[#0B2545] hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer self-start sm:self-auto"
+                      >
+                        <BarChart3 className="w-3.5 h-3.5 text-[#F58220]" />
+                        <span>Open Full Analytics</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </button>
                     </div>
 
-                    <div className="relative h-48 w-full pt-2">
-                      <svg viewBox="0 0 400 160" className="w-full h-full overflow-visible">
-                        <defs>
-                          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#0B2545" stopOpacity="0.2" />
-                            <stop offset="100%" stopColor="#0B2545" stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-                        <line x1="0" y1="30" x2="400" y2="30" stroke="#f1f5f9" strokeDasharray="3 3" />
-                        <line x1="0" y1="70" x2="400" y2="70" stroke="#f1f5f9" strokeDasharray="3 3" />
-                        <line x1="0" y1="110" x2="400" y2="110" stroke="#f1f5f9" strokeDasharray="3 3" />
-                        <line x1="0" y1="150" x2="400" y2="150" stroke="#f1f5f9" />
+                    <div className="h-52 w-full pt-2">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={overviewAnalytics.dailyMetrics} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="overviewAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#0B2545" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#0B2545" stopOpacity={0.0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis
+                            dataKey="displayDate"
+                            tick={{ fontSize: 10, fill: '#64748B' }}
+                            axisLine={{ stroke: '#E2E8F0' }}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            tick={{ fontSize: 10, fill: '#64748B' }}
+                            axisLine={false}
+                            tickLine={false}
+                            tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                          />
+                          <RechartsTooltip
+                            formatter={(value: any) => [formatCurrency(Number(value)), 'Sales Revenue']}
+                            labelFormatter={(label) => `Date: ${label}`}
+                            contentStyle={{ backgroundColor: '#0B2545', color: '#fff', borderRadius: '10px', fontSize: '11px' }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="revenue"
+                            name="Sales Revenue"
+                            stroke="#0B2545"
+                            strokeWidth={2.5}
+                            fillOpacity={1}
+                            fill="url(#overviewAreaGrad)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
 
-                        <path
-                          d="M 10 140 Q 60 110, 110 120 T 210 70 T 310 40 T 390 20 L 390 150 L 10 150 Z"
-                          fill="url(#areaGrad)"
-                        />
-                        <path
-                          d="M 10 140 Q 60 110, 110 120 T 210 70 T 310 40 T 390 20"
-                          fill="none"
-                          stroke="#0B2545"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                        />
-                        <circle cx="210" cy="70" r="4" fill="#0B2545" stroke="#fff" strokeWidth="2" />
-                        <circle cx="310" cy="40" r="5" fill="#F58220" stroke="#fff" strokeWidth="2" />
-
-                        {/* Tooltip in ₹ INR */}
-                        <g transform="translate(250, 8)">
-                          <rect width="115" height="34" rx="8" fill="#0B2545" />
-                          <text x="8" y="15" fill="#94A3B8" fontSize="9" fontWeight="bold">Active Run Rate</text>
-                          <text x="8" y="27" fill="#FFFFFF" fontSize="11" fontWeight="bold">₹1.85 Lakh</text>
-                          <text x="80" y="27" fill="#F58220" fontSize="9" fontWeight="bold">+24%</text>
-                        </g>
-                      </svg>
-                      <div className="flex justify-between text-[10px] font-semibold text-slate-400 mt-2">
-                        <span>Delhi-NCR</span>
-                        <span>Bengaluru</span>
-                        <span>Mumbai</span>
-                        <span>Hyderabad</span>
-                        <span>Tier 2 Metros</span>
-                      </div>
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1 border-t border-slate-100">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#0B2545]" />
+                        <span>Period Total: <strong>{formatCurrency(overviewAnalytics.summary.totalRevenue)}</strong></span>
+                      </span>
+                      <span>{overviewAnalytics.summary.totalOrders} orders across India</span>
+                      <span className="text-emerald-600 font-bold">{overviewAnalytics.summary.conversionRate}% conversion</span>
                     </div>
                   </div>
 
@@ -1025,6 +922,17 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* TAB: REAL-TIME ANALYTICS DASHBOARD */}
+            {activeTab === 'analytics' && (
+              <AdminAnalyticsDashboard
+                orders={orders}
+                products={products}
+                onRefreshOrders={refreshOrders}
+                formatCurrency={formatCurrency}
+                onEditProduct={openEditProductModal}
+              />
+            )}
+
             {/* TAB 2: PRODUCTS CMS */}
             {activeTab === 'products' && (
               <div className="space-y-4">
@@ -1040,6 +948,18 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Purge all previous demo products, mock inventory, and reset backend to the new Wireless Electric Mini Food Chopper?')) {
+                          purgeAndResetChopper();
+                        }
+                      }}
+                      className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                      title="Purge all old demo products and reset to the Mini Chopper"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+                      <span>Purge & Reset to Mini Chopper</span>
+                    </button>
                     <button
                       onClick={openNewProductModal}
                       className="px-4 py-2 bg-[#0B2545] hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
@@ -1064,6 +984,8 @@ export const AdminDashboard: React.FC = () => {
                     className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:outline-hidden"
                   >
                     <option value="All">All Categories ({products.length})</option>
+                    <option value="Kitchen & Home">Kitchen & Home</option>
+                    <option value="Smart Gadgets">Smart Gadgets</option>
                     <option value="Desk & Workspace">Desk & Workspace</option>
                     <option value="Tech & Mobility">Tech & Mobility</option>
                     <option value="Home & Wellness">Home & Wellness</option>
@@ -1130,7 +1052,7 @@ export const AdminDashboard: React.FC = () => {
                             <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
                               <td className="p-3.5 flex items-center gap-3">
                                 <img
-                                  src={p.images[0] || 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=150&q=80'}
+                                  src={p.images[0] || '/products/Screenshot_20260901_134903_Meesho.jpg'}
                                   alt={p.title}
                                   className="w-12 h-12 rounded-xl object-cover bg-slate-100 shrink-0 border border-slate-200"
                                 />
@@ -1992,7 +1914,7 @@ export const AdminDashboard: React.FC = () => {
                   <div key={idx} className="p-3.5 flex items-center justify-between gap-3 bg-white">
                     <div className="flex items-center gap-3">
                       <img
-                        src={item.image || 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=150&q=80'}
+                        src={item.image || '/products/Screenshot_20260901_134903_Meesho.jpg'}
                         alt={item.productTitle}
                         className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
                       />
@@ -2153,251 +2075,17 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* PRODUCT CMS ADD/EDIT MODAL */}
-      {isProductModalOpen && (
-        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  {editingProduct ? 'Edit SolveSpace Product' : 'Add New Hardware to Catalog'}
-                </h4>
-                <p className="text-xs text-slate-400">
-                  Curate specs, image assets, inventory, and automated AI product descriptions.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsProductModalOpen(false)}
-                className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveProduct} className="space-y-4">
-              {/* Title & AI Generator Button */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-700">Product Title *</label>
-                  <button
-                    type="button"
-                    onClick={handleGenerateProductCopy}
-                    disabled={isGeneratingAiCopy}
-                    className="text-[11px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 cursor-pointer"
-                  >
-                    {isGeneratingAiCopy ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    )}
-                    <span>Generate Copy with Gemini AI</span>
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. SolveSpace UltraDesk™ Ergonomic Desk Organizer"
-                  value={productForm.title}
-                  onChange={(e) => setProductForm({ ...productForm, title: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Subtitle */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Subtitle</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Modular Aerospace Aluminum Cable & Gadget Dock"
-                  value={productForm.subtitle}
-                  onChange={(e) => setProductForm({ ...productForm, subtitle: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Category, Inventory, SKU */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Category *</label>
-                  <select
-                    value={productForm.category}
-                    onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-                    className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                  >
-                    <option value="Desk & Workspace">Desk & Workspace</option>
-                    <option value="Tech & Mobility">Tech & Mobility</option>
-                    <option value="Home & Wellness">Home & Wellness</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Stock Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min={0}
-                    value={productForm.inventory}
-                    onChange={(e) =>
-                      setProductForm({ ...productForm, inventory: Number(e.target.value) })
-                    }
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">SKU</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. SS-DSK-01"
-                    value={productForm.sku}
-                    onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              {/* Pricing (INR ₹) */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Selling Price (INR ₹) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={productForm.price}
-                    onChange={(e) =>
-                      setProductForm({ ...productForm, price: Number(e.target.value) })
-                    }
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    MRP / Compare At Price (INR ₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={productForm.compareAtPrice}
-                    onChange={(e) =>
-                      setProductForm({ ...productForm, compareAtPrice: Number(e.target.value) })
-                    }
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white text-slate-500"
-                  />
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Description *</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={productForm.description}
-                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  placeholder="Engaging product description highlighting ergonomic benefits..."
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Image Preset Picker + URL Input + File Upload */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700">
-                    Product Images (URLs or Instant Curated Presets)
-                  </label>
-                  <label className="text-[11px] font-bold text-[#0B2545] hover:underline cursor-pointer">
-                    <span>+ Upload File (PNG/JPEG/WebP)</span>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={handleImageFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                {/* Preset Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  <span className="text-[10px] text-slate-400 font-bold shrink-0">Presets:</span>
-                  {CURATED_IMAGE_PRESETS.map((preset, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setProductForm((prev) => ({
-                          ...prev,
-                          imagesText: prev.imagesText ? `${prev.imagesText}\n${preset.url}` : preset.url,
-                        }));
-                        showToast(`Added ${preset.label} image`, 'info');
-                      }}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold shrink-0 cursor-pointer transition-colors"
-                    >
-                      + {preset.label}
-                    </button>
-                  ))}
-                </div>
-
-                <textarea
-                  rows={2}
-                  value={productForm.imagesText}
-                  onChange={(e) => setProductForm({ ...productForm, imagesText: e.target.value })}
-                  placeholder="Paste image URLs (one per line)..."
-                  className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Key Features */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Key Features (one per line)
-                </label>
-                <textarea
-                  rows={2}
-                  value={productForm.featuresText}
-                  onChange={(e) => setProductForm({ ...productForm, featuresText: e.target.value })}
-                  placeholder="e.g. Aerospace grade aluminum build&#10;1-Year Warranty&#10;Express Pan-India Delivery"
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tags (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={productForm.tagsText}
-                  onChange={(e) => setProductForm({ ...productForm, tagsText: e.target.value })}
-                  placeholder="Ergonomic, Workspace, SolveSpace, Trending"
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"
-                />
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsProductModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-[#0B2545] hover:bg-slate-900 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
-                >
-                  Save Product to Firestore
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* SHOPIFY-STYLE PRODUCT STUDIO & CMS */}
+      <ShopifyProductEditorModal
+        isOpen={isProductModalOpen}
+        onClose={() => {
+          setIsProductModalOpen(false);
+          setEditingProduct(null);
+        }}
+        product={editingProduct}
+        onSave={handleSaveProduct}
+        onDelete={handleDeleteProduct}
+      />
     </div>
   );
 };

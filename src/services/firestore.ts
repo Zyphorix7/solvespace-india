@@ -11,7 +11,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db, auth } from '../firebase/config';
 import { Product, Order, PaymentSettings } from '../types';
 
 export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
@@ -22,231 +22,260 @@ export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   storeCurrency: 'INR',
 };
 
-// Curated high-converting SolveSpace India collection (used when owner clicks "Seed Initial Catalog" in Admin)
+// Curated SolveSpace India collection - Wireless Electric Mini Food Chopper
 export const SAMPLE_SOLVESPACE_PRODUCTS: Omit<Product, 'id'>[] = [
   {
-    title: 'SolveSpace UltraDesk™ Ergonomic Desk Organizer',
-    subtitle: 'Modular Aerospace Aluminum Cable & Gadget Dock',
-    price: 1899,
-    compareAtPrice: 2999,
-    description: 'Transform your desktop into an elevated, clutter-free productivity zone. Engineered from precision-milled aerospace aluminum with integrated high-speed 65W GaN charging pass-through, magnetic cable tidies, and velvet anti-scratch lining.',
+    title: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
+    subtitle: 'Cordless Portable USB Rechargeable Vegetable & Food Processor (Black Top & Clear Bowl)',
+    price: 899,
+    compareAtPrice: 1499,
+    description: 'Say goodbye to teary eyes, smelly hands, and tedious manual chopping. The SolveSpace™ Wireless Electric Mini Food Chopper & Garlic Mincer packs heavy-duty mincing power into a sleek, portable cordless design. Driven by a high-torque 30W motor and razor-sharp 304 food-grade stainless steel multi-layer blades, it delivers freshly minced garlic, onions, ginger, chilies, herbs, nuts, and infant baby food purees with effortless one-touch operation in under 10 seconds. Completely wireless and USB rechargeable with an IPX6 waterproof detachable body for instant tap water rinsing.',
     images: [
-      'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
+      '/products/Screenshot_20260901_134903_Meesho.jpg',
+      '/products/1788250324092.png',
+      '/products/chopper-blades-precision.jpg',
+      '/products/chopper-cordless-motor.jpg',
+      '/products/chopper-washable-cleaning.jpg',
     ],
-    category: 'Desk & Workspace',
-    inventory: 35,
-    sku: 'SS-DSK-01',
-    rating: 4.9,
-    reviewCount: 142,
-    isFeatured: true,
-    tags: ['Best Seller', 'Ergonomic', 'Desk Setup', 'Made For India'],
-    features: [
-      'Crafted with CNC milled anodized matte aluminium',
-      'Integrated magnetic cable docking ports',
-      'Silicone base pads with zero desk scratching',
-      '1 Year SolveSpace India Hassle-Free Replacement Warranty',
+    imageDetails: [
+      {
+        url: '/products/Screenshot_20260901_134903_Meesho.jpg',
+        label: 'Flagship Overview',
+        badge: 'Assembled',
+        description: 'Wireless mini chopper assembled with 250ml bowl and garlic mincer'
+      },
+      {
+        url: '/products/1788250324092.png',
+        label: 'Modular Architecture',
+        badge: '4 Detachable Parts',
+        description: 'Complete breakdown of motor head, splash isolation lid, 3-blade unit, and bowl'
+      },
+      {
+        url: '/products/chopper-blades-precision.jpg',
+        label: '304 Stainless Steel Blades',
+        badge: 'Triple Razor Cut',
+        description: 'Food-grade multi-angle cyclone mincing with splash isolation disc'
+      },
+      {
+        url: '/products/chopper-cordless-motor.jpg',
+        label: 'Cordless USB Motor Head',
+        badge: 'High-Torque 30W',
+        description: 'One-touch pulse operation with waterproof silicone sealed USB-C charging port'
+      },
+      {
+        url: '/products/chopper-washable-cleaning.jpg',
+        label: '5-Second Tap Rinsing',
+        badge: 'IPX6 Detachable',
+        description: 'Instant water washable components with zero food trap design'
+      },
     ],
-    variants: [
-      { id: 'v1', name: 'Space Grey / Standard', price: 1899, compareAtPrice: 2999, sku: 'SS-DSK-01-GRY', inventory: 20 },
-      { id: 'v2', name: 'Matte Stealth Black', price: 1999, compareAtPrice: 3199, sku: 'SS-DSK-01-BLK', inventory: 15 },
-    ],
-  },
-  {
-    title: 'SolveSpace AirPure™ Desktop HEPA Ionic Purifier',
-    subtitle: 'Whisper-Quiet 360° Air Cleanser with Aromatherapy Chamber',
-    price: 3499,
-    compareAtPrice: 4999,
-    description: 'Combat high Indian AQI and urban pollutants right where you breathe. Features true H13 Medical Grade HEPA filtration capturing 99.97% of airborne PM2.5, dust, allergens, and VOCs with whisper-quiet 22dB acoustics.',
-    images: [
-      'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1000&q=80',
-    ],
-    category: 'Home & Wellness',
-    inventory: 18,
-    sku: 'SS-AIR-02',
-    rating: 4.8,
-    reviewCount: 98,
-    isFeatured: true,
-    tags: ['Clean Air', 'H13 HEPA', 'Low Power', 'Trending'],
-    features: [
-      'True Medical-Grade H13 HEPA 3-Stage Filtration',
-      'Covers up to 180 sq.ft personal workstation zone',
-      'Real-time ambient air quality LED indicator ring',
-      'USB-C powered with ultra-low 5W energy consumption',
-    ],
-    variants: [
-      { id: 'v3', name: 'Ceramic White', price: 3499, compareAtPrice: 4999, sku: 'SS-AIR-02-WHT', inventory: 12 },
-      { id: 'v4', name: 'Midnight Navy', price: 3599, compareAtPrice: 5199, sku: 'SS-AIR-02-NVY', inventory: 6 },
-    ],
-  },
-  {
-    title: 'SolveSpace SwiftVolt™ 100W GaN Travel Charger',
-    subtitle: '4-Port Smart Fast Charging Powerhouse with India Plug',
-    price: 2499,
-    compareAtPrice: 3999,
-    description: 'The single charger that replaces all your bricks. Powers 2 laptops, a smartphone, and earbuds simultaneously with cutting-edge Gallium Nitride (GaN III) architecture that remains remarkably cool and compact.',
-    images: [
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1609592426508-cc15f187a550?auto=format&fit=crop&w=1000&q=80',
-    ],
-    category: 'Tech & Mobility',
-    inventory: 4, // Intentionally low stock to demonstrate low-stock alert in admin
-    sku: 'SS-GAN-03',
-    rating: 4.95,
-    reviewCount: 215,
-    isFeatured: true,
-    tags: ['Fast Charging', '100W GaN', 'BIS Certified'],
-    features: [
-      '100W Max Delivery via USB-PD 3.0 & PPS fast protocols',
-      'Foldable standard Type-D/C Indian plug design',
-      'Over-voltage and surge-protected for Indian grid fluctuations',
-      'Charges MacBook Pro 16" to 50% in just 32 minutes',
-    ],
-    variants: [
-      { id: 'v5', name: 'Space Black', price: 2499, compareAtPrice: 3999, sku: 'SS-GAN-03-BLK', inventory: 4 },
-    ],
-  },
-  {
-    title: 'SolveSpace Lumina™ Smart Monitor ScreenBar',
-    subtitle: 'Anti-Glare Asymmetric Eye-Care Desk Lamp with Wireless Dial',
-    price: 2799,
-    compareAtPrice: 4499,
-    description: 'Zero screen reflection and zero eye fatigue during late-night work sessions. Features asymmetric optical design illuminating your workspace rather than the monitor screen, with stepless color temperature adjustment (2700K - 6500K).',
-    images: [
-      'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1000&q=80',
-    ],
-    category: 'Desk & Workspace',
-    inventory: 24,
-    sku: 'SS-SCR-04',
-    rating: 4.88,
-    reviewCount: 86,
-    isFeatured: false,
-    tags: ['Eye Care', 'ScreenBar', 'Smart Lighting'],
-    features: [
-      'Asymmetric 45° angled beam prevents screen glare',
-      'Wireless desktop rotary control puck for brightness/temp',
-      'High CRI > 95 for true natural color reproduction',
-      'Auto-dimming ambient light sensor built-in',
-    ],
-  },
-  {
-    title: 'SolveSpace Nomad™ Waterproof Tech Sling Bag',
-    subtitle: 'Cordura® Ballistic Fabric with RFID Shield Pocket',
-    price: 2199,
-    compareAtPrice: 3499,
-    description: 'Designed for the modern commuter navigating Indian monsoons and crowded transits. Features waterproof YKK AquaGuard zippers, magnetic quick-release fidlock buckle, padded iPad sleeve, and hidden passport security pocket.',
-    images: [
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&w=1000&q=80',
-    ],
-    category: 'Tech & Mobility',
-    inventory: 3, // Low stock demo
-    sku: 'SS-SLG-05',
+    category: 'Kitchen & Home',
+    inventory: 50,
+    sku: 'SS-CHOP-01',
     rating: 4.92,
-    reviewCount: 64,
-    isFeatured: false,
-    tags: ['Waterproof', 'Cordura', 'Travel Essential'],
+    reviewCount: 186,
+    isFeatured: true,
+    tags: ['Best Seller', 'Cordless', 'USB Rechargeable', 'One-Touch Pulse', '304 Stainless Steel', 'BPA Free'],
     features: [
-      'Military-grade 1000D Cordura® weather-resistant exterior',
-      'Magnetic German Fidlock® V-buckle for rapid strap release',
-      'Dedicated plush tablet sleeve fits up to 11" iPad Pro',
-      'Ergonomic breathable back panel for hot climates',
+      '⚡ Cordless & USB Rechargeable: High-capacity lithium battery powers 35+ chopping sessions on a single 2-hour charge',
+      '🔘 One-Touch Ergonomic Pulse Operation: Press top button to pulse, release to stop instant consistency control',
+      '🔪 Triple-Layer 304 Stainless Steel Blades: S-shaped razor-sharp blades mince garlic, onions, chili, ginger, and nuts in 5–10 seconds',
+      '🥣 100% Food-Grade BPA-Free 250ml Bowl: Safe for infant baby food, purees, pestos, salad dressings, and Indian gravies',
+      '💧 IPX6 Waterproof Detachable Design: Motor, container bowl, and blades separate for effortless 5-second tap water rinsing',
+      '🪶 Ultra-Compact & Portable: Minimalist space-saving footprint fits effortlessly in any kitchen drawer or travel bag',
+    ],
+    variants: [
+      { id: 'v1', name: 'Stealth Matte Black (250ml Bowl)', price: 899, compareAtPrice: 1499, sku: 'SS-CHOP-BLK-250', inventory: 50, image: '/products/Screenshot_20260901_134903_Meesho.jpg' },
     ],
   },
 ];
 
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  };
+}
+
+export function handleFirestoreError(
+  error: unknown,
+  operationType: OperationType,
+  path: string | null
+): FirestoreErrorInfo {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth?.currentUser?.uid ?? null,
+      email: auth?.currentUser?.email ?? null,
+      emailVerified: auth?.currentUser?.emailVerified ?? null,
+      isAnonymous: auth?.currentUser?.isAnonymous ?? null,
+      tenantId: auth?.currentUser?.tenantId ?? null,
+      providerInfo:
+        auth?.currentUser?.providerData?.map((p) => ({
+          providerId: p.providerId,
+          email: p.email,
+        })) || [],
+    },
+    operationType,
+    path,
+  };
+  console.warn('Firestore Operation Notice:', JSON.stringify(errInfo));
+  return errInfo;
+}
+
+// Network timeout helper to prevent offline or slow iframe handshakes from blocking app
+async function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000): Promise<T> {
+  let timer: any;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Network timeout')), timeoutMs);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Product operations
 export async function getProductsFromDb(): Promise<Product[]> {
+  const path = 'products';
   try {
-    const productsCol = collection(db, 'products');
-    const snapshot = await getDocs(productsCol);
+    const productsCol = collection(db, path);
+    const snapshot = await withTimeout(getDocs(productsCol), 6000);
     const list: Product[] = [];
     snapshot.forEach((docSnap) => {
       list.push({ id: docSnap.id, ...(docSnap.data() as Omit<Product, 'id'>) });
     });
     return list;
   } catch (err) {
-    console.warn('Firestore fetch error or offline, fallback to empty array:', err);
+    handleFirestoreError(err, OperationType.LIST, path);
     return [];
   }
 }
 
 export async function addProductToDb(product: Omit<Product, 'id'>): Promise<string> {
-  const productsCol = collection(db, 'products');
-  const docRef = await addDoc(productsCol, {
-    ...product,
-    createdAt: new Date().toISOString(),
-  });
-  return docRef.id;
+  const path = 'products';
+  try {
+    const productsCol = collection(db, path);
+    const docRef = await addDoc(productsCol, {
+      ...product,
+      createdAt: new Date().toISOString(),
+    });
+    return docRef.id;
+  } catch (err) {
+    handleFirestoreError(err, OperationType.CREATE, path);
+    throw err;
+  }
 }
 
 export async function updateProductInDb(id: string, updates: Partial<Product>): Promise<void> {
-  const docRef = doc(db, 'products', id);
-  await updateDoc(docRef, updates);
+  const path = `products/${id}`;
+  try {
+    const docRef = doc(db, 'products', id);
+    await updateDoc(docRef, updates);
+  } catch (err) {
+    handleFirestoreError(err, OperationType.UPDATE, path);
+    throw err;
+  }
 }
 
 export async function deleteProductFromDb(id: string): Promise<void> {
-  const docRef = doc(db, 'products', id);
-  await deleteDoc(docRef);
+  const path = `products/${id}`;
+  try {
+    const docRef = doc(db, 'products', id);
+    await deleteDoc(docRef);
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, path);
+    throw err;
+  }
 }
 
 // Payment Settings
 export async function getPaymentSettingsFromDb(): Promise<PaymentSettings> {
+  const path = 'settings/payments';
   try {
     const docRef = doc(db, 'settings', 'payments');
-    const snap = await getDoc(docRef);
+    const snap = await withTimeout(getDoc(docRef), 6000);
     if (snap.exists()) {
       return snap.data() as PaymentSettings;
     }
-    // Return default settings
     return DEFAULT_PAYMENT_SETTINGS;
   } catch (err) {
-    console.warn('Error fetching payment settings from db, using defaults:', err);
+    handleFirestoreError(err, OperationType.GET, path);
     return DEFAULT_PAYMENT_SETTINGS;
   }
 }
 
 export async function savePaymentSettingsToDb(settings: PaymentSettings): Promise<void> {
-  const docRef = doc(db, 'settings', 'payments');
-  await setDoc(docRef, settings, { merge: true });
+  const path = 'settings/payments';
+  try {
+    const docRef = doc(db, 'settings', 'payments');
+    await setDoc(docRef, settings, { merge: true });
+  } catch (err) {
+    handleFirestoreError(err, OperationType.WRITE, path);
+    throw err;
+  }
 }
 
 // Orders
 export async function getOrdersFromDb(): Promise<Order[]> {
+  const path = 'orders';
   try {
-    const ordersCol = collection(db, 'orders');
+    const ordersCol = collection(db, path);
     const q = query(ordersCol, orderBy('createdAt', 'desc'), limit(50));
-    const snapshot = await getDocs(q);
+    const snapshot = await withTimeout(getDocs(q), 6000);
     const list: Order[] = [];
     snapshot.forEach((docSnap) => {
       list.push({ id: docSnap.id, ...(docSnap.data() as Omit<Order, 'id'>) });
     });
     return list;
   } catch (err) {
-    console.warn('Error fetching orders from db:', err);
+    handleFirestoreError(err, OperationType.LIST, path);
     return [];
   }
 }
 
 export async function createOrderInDb(orderData: Omit<Order, 'id'>): Promise<string> {
-  const ordersCol = collection(db, 'orders');
-  const docRef = await addDoc(ordersCol, {
-    ...orderData,
-    createdAt: new Date().toISOString(),
-  });
-  return docRef.id;
+  const path = 'orders';
+  try {
+    const ordersCol = collection(db, path);
+    const docRef = await addDoc(ordersCol, {
+      ...orderData,
+      createdAt: new Date().toISOString(),
+    });
+    return docRef.id;
+  } catch (err) {
+    handleFirestoreError(err, OperationType.CREATE, path);
+    throw err;
+  }
 }
 
 export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [
   {
     orderNumber: 'SS-IN-984210',
     customer: {
-      fullName: 'Rahul Sharma',
+      fullName: 'Priyanka Sen',
       phoneNumber: '+91 98765 43210',
-      email: 'rahul.s@example.com',
+      email: 'priyanka.sen@example.com',
       addressLine1: 'Flat 402, Prestige Tower, Indiranagar',
       city: 'Bengaluru',
       state: 'Karnataka',
@@ -255,28 +284,26 @@ export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [
     },
     items: [
       {
-        productId: 'sample_1',
-        productTitle: 'SolveSpace UltraDesk™ Ergonomic Desk Organizer',
-        variantName: 'Space Grey / Standard',
+        productId: 'chopper_main_prod',
+        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
+        variantName: 'Stealth Matte Black (250ml Bowl)',
         quantity: 1,
-        price: 1899,
-        image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
+        price: 899,
+        image: '/products/Screenshot_20260901_134903_Meesho.jpg',
       },
     ],
-    subtotal: 1899,
+    subtotal: 899,
     discount: 0,
-    shippingFee: 0,
-    totalAmount: 1899,
+    shippingFee: 99,
+    totalAmount: 998,
     paymentMethod: 'cashfree',
     paymentStatus: 'paid',
     orderStatus: 'delivered',
     trackingNumber: 'DEL10982348IN',
     courierName: 'Delhivery Surface',
     estimatedDeliveryDate: 'Delivered',
-    exchangeStatus: 'requested',
-    exchangeReason: 'Requested exchange for Matte Stealth Black variant',
-    exchangeNotes: 'Customer contacted support. Product seal intact.',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    exchangeStatus: 'none',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     orderNumber: 'SS-IN-984211',
@@ -291,18 +318,18 @@ export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [
     },
     items: [
       {
-        productId: 'sample_2',
-        productTitle: 'SolveSpace SwiftVolt™ 100W GaN Travel Charger',
-        variantName: 'Space Black',
+        productId: 'chopper_main_prod',
+        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
+        variantName: 'Stealth Matte Black (250ml Bowl)',
         quantity: 1,
-        price: 2499,
-        image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=1000&q=80',
+        price: 899,
+        image: '/products/1788250324092.png',
       },
     ],
-    subtotal: 2499,
-    discount: 250,
+    subtotal: 899,
+    discount: 0,
     shippingFee: 0,
-    totalAmount: 2249,
+    totalAmount: 899,
     paymentMethod: 'cashfree',
     paymentStatus: 'paid',
     orderStatus: 'shipped',
@@ -325,26 +352,18 @@ export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [
     },
     items: [
       {
-        productId: 'sample_3',
-        productTitle: 'SolveSpace AirPure™ Desktop HEPA Ionic Purifier',
-        variantName: 'Ceramic White',
-        quantity: 1,
-        price: 3499,
-        image: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1000&q=80',
-      },
-      {
-        productId: 'sample_1',
-        productTitle: 'SolveSpace UltraDesk™ Ergonomic Desk Organizer',
-        variantName: 'Matte Stealth Black',
-        quantity: 1,
-        price: 1999,
-        image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
+        productId: 'chopper_main_prod',
+        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
+        variantName: 'Stealth Matte Black (250ml Bowl)',
+        quantity: 2,
+        price: 899,
+        image: '/products/Screenshot_20260901_134903_Meesho.jpg',
       },
     ],
-    subtotal: 5498,
-    discount: 500,
+    subtotal: 1798,
+    discount: 180,
     shippingFee: 0,
-    totalAmount: 4998,
+    totalAmount: 1618,
     paymentMethod: 'cod',
     paymentStatus: 'cod_pending',
     orderStatus: 'processing',
@@ -361,12 +380,18 @@ export async function updateOrderStatusInDb(
   trackingNumber?: string,
   courierName?: string
 ): Promise<void> {
-  const docRef = doc(db, 'orders', orderId);
-  const payload: any = { orderStatus };
-  if (paymentStatus) payload.paymentStatus = paymentStatus;
-  if (trackingNumber !== undefined) payload.trackingNumber = trackingNumber;
-  if (courierName !== undefined) payload.courierName = courierName;
-  await updateDoc(docRef, payload);
+  const path = `orders/${orderId}`;
+  try {
+    const docRef = doc(db, 'orders', orderId);
+    const payload: any = { orderStatus };
+    if (paymentStatus) payload.paymentStatus = paymentStatus;
+    if (trackingNumber !== undefined) payload.trackingNumber = trackingNumber;
+    if (courierName !== undefined) payload.courierName = courierName;
+    await updateDoc(docRef, payload);
+  } catch (err) {
+    handleFirestoreError(err, OperationType.UPDATE, path);
+    throw err;
+  }
 }
 
 export async function updateOrderExchangeInDb(
@@ -375,20 +400,32 @@ export async function updateOrderExchangeInDb(
   exchangeReason?: string,
   exchangeNotes?: string
 ): Promise<void> {
-  const docRef = doc(db, 'orders', orderId);
-  const payload: any = {
-    exchangeStatus,
-    exchangeUpdatedAt: new Date().toISOString(),
-  };
-  if (exchangeReason !== undefined) payload.exchangeReason = exchangeReason;
-  if (exchangeNotes !== undefined) payload.exchangeNotes = exchangeNotes;
-  await updateDoc(docRef, payload);
+  const path = `orders/${orderId}`;
+  try {
+    const docRef = doc(db, 'orders', orderId);
+    const payload: any = {
+      exchangeStatus,
+      exchangeUpdatedAt: new Date().toISOString(),
+    };
+    if (exchangeReason !== undefined) payload.exchangeReason = exchangeReason;
+    if (exchangeNotes !== undefined) payload.exchangeNotes = exchangeNotes;
+    await updateDoc(docRef, payload);
+  } catch (err) {
+    handleFirestoreError(err, OperationType.UPDATE, path);
+    throw err;
+  }
 }
 
 // Quick Stock Update helper
 export async function quickUpdateStockInDb(productId: string, newInventory: number): Promise<void> {
-  const docRef = doc(db, 'products', productId);
-  await updateDoc(docRef, { inventory: Math.max(0, newInventory) });
+  const path = `products/${productId}`;
+  try {
+    const docRef = doc(db, 'products', productId);
+    await updateDoc(docRef, { inventory: Math.max(0, newInventory) });
+  } catch (err) {
+    handleFirestoreError(err, OperationType.UPDATE, path);
+    throw err;
+  }
 }
 
 // Helper to seed initial sample catalog
@@ -410,3 +447,37 @@ export async function seedInitialOrders(): Promise<Order[]> {
   }
   return added;
 }
+
+// Purge all existing products from Firestore
+export async function purgeAllProductsFromDb(): Promise<void> {
+  try {
+    const productsCol = collection(db, 'products');
+    const snapshot = await withTimeout(getDocs(productsCol), 10000);
+    const deletePromises = snapshot.docs.map((docSnap) => withTimeout(deleteDoc(doc(db, 'products', docSnap.id)), 5000));
+    await Promise.allSettled(deletePromises);
+  } catch (err) {
+    console.warn('Error purging products from Firestore:', err);
+  }
+}
+
+// Purge all orders from Firestore
+export async function purgeAllOrdersFromDb(): Promise<void> {
+  try {
+    const ordersCol = collection(db, 'orders');
+    const snapshot = await withTimeout(getDocs(ordersCol), 10000);
+    const deletePromises = snapshot.docs.map((docSnap) => withTimeout(deleteDoc(doc(db, 'orders', docSnap.id)), 5000));
+    await Promise.allSettled(deletePromises);
+  } catch (err) {
+    console.warn('Error purging orders from Firestore:', err);
+  }
+}
+
+// Complete Purge & Reset: Purges all old demo products & mock analysis, then sets the new Chopper product
+export async function purgeAllDataAndSeedChopper(): Promise<{ products: Product[]; orders: Order[] }> {
+  await purgeAllProductsFromDb();
+  await purgeAllOrdersFromDb();
+  const products = await seedSolveSpaceCatalog();
+  const orders = await seedInitialOrders();
+  return { products, orders };
+}
+

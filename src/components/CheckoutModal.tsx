@@ -34,6 +34,7 @@ export const CheckoutModal: React.FC = () => {
     formatCurrency,
     setExchangePolicyModalOpen,
     setTrackOrderModalOpen,
+    showToast,
   } = useStore();
 
   const { user } = useAuth();
@@ -114,12 +115,12 @@ export const CheckoutModal: React.FC = () => {
     e.preventDefault();
 
     if (!shipping.fullName || !shipping.phoneNumber || !shipping.addressLine1 || !shipping.city.trim() || !shipping.state.trim()) {
-      alert('Please fill in all mandatory shipping address fields including City/District and State.');
+      showToast('Please fill in all mandatory shipping address fields including City/District and State.', 'error');
       return;
     }
 
     if (!pincodeStatus?.serviceable) {
-      alert('Please enter a valid, serviceable 6-digit Indian pincode to continue.');
+      showToast('Please enter a valid, serviceable 6-digit Indian pincode to continue.', 'error');
       return;
     }
 
@@ -128,7 +129,7 @@ export const CheckoutModal: React.FC = () => {
 
   const handleCompleteOrder = async () => {
     if (!selectedPaymentMethod) {
-      alert('Please select a payment method.');
+      showToast('Please select a payment method.', 'error');
       return;
     }
 
@@ -161,7 +162,7 @@ export const CheckoutModal: React.FC = () => {
       setStep(3);
     } catch (err: any) {
       console.error('Order creation error:', err);
-      alert('There was an error processing your order. Please try again.');
+      showToast('There was an error processing your order. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }

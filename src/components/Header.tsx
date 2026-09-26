@@ -39,13 +39,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
     setTrackOrderModalOpen,
     setExchangePolicyModalOpen,
     formatCurrency,
+    navigateToHome,
   } = useStore();
 
   const { user } = useAuth();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
-  const categories = ['All', 'Desk & Workspace', 'Tech & Mobility', 'Home & Wellness'];
+  const categories = ['All', 'Kitchen & Home', 'Smart Gadgets', 'Accessories'];
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-xs font-sans">
@@ -120,7 +121,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
           </button>
 
           {/* Official SolveSpace India Logo from Brand Identity Kit */}
-          <a href="#" className="flex items-center group">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigateToHome();
+            }}
+            className="flex items-center group cursor-pointer"
+          >
             <SolveSpaceLogo variant="main" size="md" />
           </a>
         </div>
@@ -162,14 +170,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Workspace Studio Builder Trigger (Unique Feature) */}
+          {/* Kitchen Combo Builder Trigger */}
           <button
             onClick={() => setSetupBuilderOpen(true)}
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-[#0B2545] hover:bg-slate-900 text-white transition-all shadow-xs active:scale-95 cursor-pointer"
-            title="Configure Custom Workspace Setup"
+            title="Configure Custom Kitchen Chopper Combo"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#FF5A36]" />
-            <span>Studio Builder</span>
+            <span>Combo Builder</span>
           </button>
 
           {/* User Account (Screenshot 2: User Icon + Text) */}

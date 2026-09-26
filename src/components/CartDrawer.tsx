@@ -141,9 +141,9 @@ export const CartDrawer: React.FC = () => {
                 {/* Product Image */}
                 <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-100">
                   <img
-                    src={item.variant?.image || item.product.images[0] || 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=300&q=80'}
+                    src={item.variant?.image || item.product.images[0] || '/products/Screenshot_20260901_134903_Meesho.jpg'}
                     alt={item.product.title}
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-contain p-1"
                     loading="lazy"
                   />
                 </div>

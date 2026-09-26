@@ -25,126 +25,128 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
   variant = 'main',
   size = 'md',
   customLogoUrl,
-  textColor = '#0B2545',
+  textColor = '#003B5C',
   subtextColor,
   onClick,
 }) => {
+  const isWhite = textColor === '#FFFFFF' || textColor?.toLowerCase() === 'white';
+
+  // Responsive height map for logo rendering
+  const heightClassMap = {
+    xs: 'h-6 sm:h-7',
+    sm: 'h-7 sm:h-8',
+    md: 'h-9 sm:h-10',
+    lg: 'h-12 sm:h-14',
+    xl: 'h-16 sm:h-20',
+    '2xl': 'h-24 sm:h-28',
+  };
+
+  const iconPxMap = {
+    xs: 24,
+    sm: 30,
+    md: 38,
+    lg: 52,
+    xl: 72,
+    '2xl': 96,
+  };
+
+  const px = iconPxMap[size] || 38;
+
+  // Custom Logo URL override if specified in Store settings
   if (customLogoUrl) {
-    const heightMap = {
-      xs: '20px',
-      sm: '28px',
-      md: '38px',
-      lg: '52px',
-      xl: '68px',
-      '2xl': '88px',
-    };
     return (
       <img
         src={customLogoUrl}
         alt="SolveSpace India"
         onClick={onClick}
-        className={`object-contain cursor-pointer ${className}`}
-        style={{ maxHeight: heightMap[size] || '38px' }}
+        referrerPolicy="no-referrer"
+        className={`object-contain cursor-pointer ${heightClassMap[size] || 'h-9'} ${className}`}
       />
     );
   }
 
-  // Exact vector icon dimensions
-  const iconPxMap = {
-    xs: 22,
-    sm: 30,
-    md: 40,
-    lg: 54,
-    xl: 72,
-    '2xl': 96,
-  };
-
-  const px = iconPxMap[size] || 40;
-
-  // The Official SolveSpace India Logomark SVG (Navy Hexagon-Bulb with Breakthrough Zigzag Arrow + Orange Filament & Wall)
-  const LogomarkSVG = ({
-    primaryColor = '#0B2545',
-    secondaryColor = '#F58220',
-    baseColor = '#0B2545',
-    strokeWidth = 7.5,
-    customPx = px,
+  // Exact Official SolveSpace Logomark Vector (Matching IMG_20260901_125608_344.jpg)
+  const ExactLogomark = ({
+    navyColor = '#003B5C',
+    orangeColor = '#F58220',
+    customSize = px,
   }: {
-    primaryColor?: string;
-    secondaryColor?: string;
-    baseColor?: string;
-    strokeWidth?: number;
-    customPx?: number;
+    navyColor?: string;
+    orangeColor?: string;
+    customSize?: number;
   }) => (
     <svg
-      width={customPx}
-      height={customPx}
-      viewBox="0 0 120 120"
+      width={customSize}
+      height={customSize}
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="shrink-0 transition-transform duration-300 group-hover:scale-105"
     >
-      {/* 1. Left Hexagon Outer Shell & Bulb Shoulder (Navy) */}
-      <path
-        d="M44 86L28 72V42L54 20L66 30"
-        stroke={primaryColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <g transform="translate(6, 2)">
+        {/* 1. Left Hexagon Outer Shell & Bulb Shoulder (Navy) */}
+        <path
+          d="M38 78L26 66L20 54V32L46 16L58 23"
+          stroke={navyColor}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
-      {/* 2. Inner Lightning / Growth Zigzag Arrow (Navy) */}
-      <path
-        d="M34 64L48 52L60 64L98 26"
-        stroke={primaryColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        {/* 2. Orange Bulb Body & Right Hexagon Wall */}
+        <path
+          d="M62 25L72 32V54L66 66L54 78"
+          stroke={orangeColor}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
-      {/* 3. Arrow Head Pointing North-East (Navy) */}
-      <path
-        d="M74 24H100V50"
-        stroke={primaryColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        {/* 3. Inner Orange Bulb Contour */}
+        <path
+          d="M66 52C66 40 58 34 50 34"
+          stroke={orangeColor}
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
 
-      {/* 4. Right Hexagon Wall (Orange) */}
-      <path
-        d="M76 86L92 72V46"
-        stroke={secondaryColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        {/* 4. Breakthrough Zigzag Growth Trend Line (Navy) */}
+        <path
+          d="M23 48L33 58L45 44L56 56L82 20"
+          stroke={navyColor}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
-      {/* 5. Orange Bulb Body & Glowing Filament Arch */}
-      <path
-        d="M76 86C76 72 86 64 86 50C86 42 80 36 72 36"
-        stroke={secondaryColor}
-        strokeWidth={strokeWidth - 0.5}
-        strokeLinecap="round"
-      />
+        {/* 5. Upward Arrowhead (Navy) */}
+        <path
+          d="M64 20H82V38"
+          stroke={navyColor}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
-      {/* 6. Bulb Base Contact Threads (Navy/Base) */}
-      <path
-        d="M46 96H74"
-        stroke={baseColor}
-        strokeWidth={strokeWidth - 0.5}
-        strokeLinecap="round"
-      />
-      <path
-        d="M53 105H67"
-        stroke={baseColor}
-        strokeWidth={strokeWidth - 1}
-        strokeLinecap="round"
-      />
+        {/* 6. Bulb Socket Base (Navy) */}
+        <path
+          d="M38 86H54"
+          stroke={navyColor}
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M42 93H50"
+          stroke={navyColor}
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+      </g>
     </svg>
   );
 
-  // Flowing Indian Tricolor Wave Flag Ribbon
-  const TricolorWave = ({ height = 13 }: { height?: number }) => (
+  // Exact Flowing Indian Tricolor Wave Flag Ribbon
+  const ExactTricolorWave = ({ height = 14 }: { height?: number }) => (
     <svg
       height={height}
       viewBox="0 0 46 16"
@@ -152,21 +154,18 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className="shrink-0 drop-shadow-xs"
     >
-      {/* Saffron Top Wave Ribbon */}
       <path
-        d="M2 3.5C10 0.5 18 6.5 28 4.5C34 3 40 1.5 45 1C41 4.5 35 6 28 7.5C18 9.5 10 3.5 2 6.5Z"
+        d="M2 5C10 2 18 8 28 6C34 4.5 40 3 45 2.5C41 6 35 7.5 28 9C18 11 10 5 2 8Z"
         fill="#FF671F"
       />
-      {/* White Middle Wave Ribbon */}
       <path
-        d="M2 7C10 4 18 10 28 8C34 6.5 40 5 45 4.5C41 8 35 9.5 28 11C18 13 10 7 2 10Z"
+        d="M2 8.5C10 5.5 18 11.5 28 9.5C34 8 40 6.5 45 6C41 9.5 35 11 28 12.5C18 14.5 10 8.5 2 11.5Z"
         fill="#FFFFFF"
-        stroke="#E2E8F0"
-        strokeWidth="0.4"
+        stroke="#CBD5E1"
+        strokeWidth="0.3"
       />
-      {/* India Green Bottom Wave Ribbon */}
       <path
-        d="M2 10.5C10 7.5 18 13.5 28 11.5C34 10 40 8.5 45 8C41 11.5 35 13 28 14.5C18 16.5 10 10.5 2 13.5Z"
+        d="M2 12C10 9 18 15 28 13C34 11.5 40 10 45 9.5C41 13 35 14.5 28 16C18 18 10 12 2 15Z"
         fill="#046A38"
       />
     </svg>
@@ -179,78 +178,72 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
         onClick={onClick}
         className={`inline-flex items-center justify-center cursor-pointer ${className}`}
       >
-        <LogomarkSVG />
+        <ExactLogomark
+          navyColor={isWhite ? '#FFFFFF' : '#003B5C'}
+          orangeColor="#F58220"
+        />
       </div>
     );
   }
 
-  // 2. Profile Picture Logo (App Icon with white rounded squircle & shadow)
+  // 2. Profile Picture Logo (App Icon squircle with drop shadow, as on sheet)
   if (variant === 'app-icon') {
     return (
       <div
         onClick={onClick}
-        className={`inline-flex items-center justify-center bg-white rounded-3xl p-3 sm:p-4 shadow-[0_12px_32px_rgba(11,37,69,0.12)] border border-slate-100 hover:shadow-[0_16px_40px_rgba(11,37,69,0.18)] transition-all cursor-pointer ${className}`}
+        className={`inline-flex items-center justify-center bg-white rounded-3xl p-3 sm:p-4 shadow-[0_12px_32px_rgba(0,59,92,0.12)] border border-slate-100 hover:shadow-[0_16px_40px_rgba(0,59,92,0.18)] transition-all cursor-pointer ${className}`}
       >
-        <LogomarkSVG customPx={px * 1.2} />
+        <ExactLogomark customSize={px * 1.25} />
       </div>
     );
   }
 
-  // 3. Simplified Single-Color Navy Logomark
+  // 3. Simplified Single-Tone Navy Logomark (as on bottom center of sheet)
   if (variant === 'simplified') {
     return (
       <div
         onClick={onClick}
         className={`inline-flex items-center justify-center cursor-pointer ${className}`}
       >
-        <LogomarkSVG
-          primaryColor="#0B2545"
-          secondaryColor="#0B2545"
-          baseColor="#0B2545"
+        <ExactLogomark
+          navyColor="#003B5C"
+          orangeColor="#003B5C"
         />
       </div>
     );
   }
 
-  // 4. Inverted White Logomark on Navy Square Tile
+  // 4. Inverted White Logomark on Navy Square Tile (as on bottom center-right of sheet)
   if (variant === 'inverted') {
     return (
       <div
         onClick={onClick}
-        className={`inline-flex items-center justify-center bg-[#0B2545] rounded-2xl p-3 shadow-md hover:opacity-95 transition-all cursor-pointer ${className}`}
+        className={`inline-flex items-center justify-center bg-[#003B5C] rounded-2xl p-3 shadow-md hover:opacity-95 transition-all cursor-pointer ${className}`}
       >
-        <LogomarkSVG
-          primaryColor="#FFFFFF"
-          secondaryColor="#FFFFFF"
-          baseColor="#FFFFFF"
+        <ExactLogomark
+          navyColor="#FFFFFF"
+          orangeColor="#FFFFFF"
         />
       </div>
     );
   }
 
-  // 5. Watermark / Transparent Packaging Logo (as seen on the box in the sheet)
+  // 5. Watermark / Transparent Packaging Logo (as seen on the box packaging on sheet)
   if (variant === 'watermark') {
     return (
       <div
         onClick={onClick}
-        className={`inline-flex items-center gap-2.5 opacity-40 hover:opacity-75 transition-opacity select-none ${className}`}
+        className={`inline-flex items-center gap-2.5 opacity-45 hover:opacity-75 transition-opacity select-none ${className}`}
       >
-        <LogomarkSVG
-          primaryColor="#475569"
-          secondaryColor="#475569"
-          baseColor="#475569"
+        <ExactLogomark
+          navyColor="#475569"
+          orangeColor="#475569"
         />
         <div className="flex flex-col leading-none">
-          <span
-            className="font-extrabold tracking-tight text-slate-600 text-lg uppercase"
-            style={{ fontFamily: 'Space Grotesk, sans-serif' }}
-          >
+          <span className="font-black tracking-tight text-slate-700 text-lg uppercase font-sans">
             SOLVESPACE
           </span>
-          <span
-            className="text-[10px] font-black tracking-[0.25em] text-slate-500 uppercase mt-0.5"
-            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
-          >
+          <span className="text-[10px] font-extrabold tracking-[0.25em] text-slate-500 uppercase mt-0.5 font-sans">
             INDIA
           </span>
         </div>
@@ -265,13 +258,15 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
         onClick={onClick}
         className={`inline-flex flex-col items-center text-center cursor-pointer select-none group ${className}`}
       >
-        <LogomarkSVG customPx={px * 1.1} />
-        <div className="mt-2.5 flex flex-col items-center">
+        <ExactLogomark
+          customSize={px * 1.15}
+          navyColor={isWhite ? '#FFFFFF' : '#003B5C'}
+        />
+        <div className="mt-2 flex flex-col items-center">
           <span
-            className="block font-extrabold tracking-tight text-xl sm:text-2xl"
+            className="block font-black tracking-tight text-xl sm:text-2xl font-sans"
             style={{
               color: textColor,
-              fontFamily: 'Space Grotesk, sans-serif',
               letterSpacing: '-0.02em',
             }}
           >
@@ -279,31 +274,32 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
           </span>
           <div className="flex items-center justify-center gap-1.5 mt-0.5">
             <span
-              className="text-xs sm:text-sm font-black tracking-[0.28em]"
+              className="text-xs sm:text-sm font-extrabold tracking-[0.24em] font-sans"
               style={{
-                color: subtextColor || (textColor === '#FFFFFF' ? '#E2E8F0' : '#0B2545'),
-                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                color: subtextColor || (isWhite ? '#CBD5E1' : '#003B5C'),
               }}
             >
               INDIA
             </span>
-            <TricolorWave height={11} />
+            <ExactTricolorWave height={12} />
           </div>
         </div>
       </div>
     );
   }
 
-  // 7. Horizontal Logo (Icon + SOLVESPACE only)
+  // 7. Horizontal Logo (Icon + SOLVESPACE only, as in sheet middle)
   if (variant === 'horizontal') {
     return (
       <div
         onClick={onClick}
         className={`inline-flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none group ${className}`}
       >
-        <LogomarkSVG />
+        <ExactLogomark
+          navyColor={isWhite ? '#FFFFFF' : '#003B5C'}
+        />
         <span
-          className={`font-extrabold tracking-tight ${
+          className={`font-black tracking-tight font-sans ${
             size === 'xs'
               ? 'text-sm'
               : size === 'sm'
@@ -316,7 +312,6 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
           }`}
           style={{
             color: textColor,
-            fontFamily: 'Space Grotesk, sans-serif',
             letterSpacing: '-0.02em',
           }}
         >
@@ -326,57 +321,19 @@ export const SolveSpaceLogo: React.FC<SolveSpaceLogoProps> = ({
     );
   }
 
-  // 8. Main Logo (Official brand logo: Icon + SOLVESPACE + INDIA with flowing Tricolor Wave)
+  // 8. Main Logo (Official exact brand logo from top-center of brand sheet)
+  // Renders the exact SVG asset directly
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center gap-2.5 sm:gap-3.5 cursor-pointer select-none group ${className}`}
+      className={`inline-flex items-center cursor-pointer select-none group ${heightClassMap[size] || 'h-9'} ${className}`}
     >
-      <LogomarkSVG />
-      <div className="flex flex-col leading-none">
-        <span
-          className={`font-black tracking-tight ${
-            size === 'xs'
-              ? 'text-sm'
-              : size === 'sm'
-              ? 'text-base sm:text-lg'
-              : size === 'md'
-              ? 'text-lg sm:text-xl md:text-2xl'
-              : size === 'lg'
-              ? 'text-2xl sm:text-3xl'
-              : 'text-4xl'
-          }`}
-          style={{
-            color: textColor,
-            fontFamily: 'Space Grotesk, sans-serif',
-            letterSpacing: '-0.025em',
-          }}
-        >
-          SOLVESPACE
-        </span>
-        <div className="flex items-center gap-1.5 mt-1 sm:mt-1.5">
-          <span
-            className={`font-extrabold tracking-[0.28em] ${
-              size === 'xs'
-                ? 'text-[8px]'
-                : size === 'sm'
-                ? 'text-[10px]'
-                : size === 'md'
-                ? 'text-[11px] sm:text-xs'
-                : 'text-sm'
-            }`}
-            style={{
-              color: subtextColor || (textColor === '#FFFFFF' ? '#CBD5E1' : '#0B2545'),
-              fontFamily: 'Plus Jakarta Sans, sans-serif',
-            }}
-          >
-            INDIA
-          </span>
-          <TricolorWave
-            height={size === 'xs' ? 9 : size === 'sm' ? 11 : size === 'md' ? 13 : 16}
-          />
-        </div>
-      </div>
+      <img
+        src={isWhite ? '/solvespace-logo-white.svg' : '/solvespace-logo.svg'}
+        alt="SolveSpace India"
+        referrerPolicy="no-referrer"
+        className="h-full w-auto object-contain shrink-0"
+      />
     </div>
   );
 };

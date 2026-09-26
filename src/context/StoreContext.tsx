@@ -11,6 +11,7 @@ import {
   quickUpdateStockInDb,
   seedSolveSpaceCatalog,
   seedInitialOrders,
+  purgeAllDataAndSeedChopper,
   SAMPLE_SOLVESPACE_PRODUCTS,
   DEFAULT_PAYMENT_SETTINGS,
 } from '../services/firestore';
@@ -21,6 +22,7 @@ interface StoreContextType {
   isLoadingProducts: boolean;
   paymentSettings: PaymentSettings;
   updatePaymentSettings: (newSettings: PaymentSettings) => Promise<void>;
+  purgeAndResetChopper: () => Promise<void>;
   cart: CartItem[];
   cartDrawerOpen: boolean;
   setCartDrawerOpen: (open: boolean) => void;
@@ -34,6 +36,12 @@ interface StoreContextType {
   setExchangePolicyModalOpen: (open: boolean) => void;
   setupBuilderOpen: boolean;
   setSetupBuilderOpen: (open: boolean) => void;
+
+  // 404 Not Found Page routing
+  isNotFound: boolean;
+  setIsNotFound: (open: boolean) => void;
+  navigateToHome: () => void;
+  navigateTo404: () => void;
   
   // Admin state & security
   adminOpen: boolean;
@@ -142,6 +150,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [exchangePolicyModalOpen, setExchangePolicyModalOpen] = useState(false);
   const [setupBuilderOpen, setSetupBuilderOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
+
+  const navigateToHome = () => {
+    setIsNotFound(false);
+    setAdminOpen(false);
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const isRepoSubfolder = window.location.hostname.endsWith('github.io') && segments.length >= 1;
+    const basePath = isRepoSubfolder ? `/${segments[0]}/` : '/';
+    try {
+      window.history.pushState(null, '', basePath);
+    } catch {
+      window.location.hash = '';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateTo404 = () => {
+    setIsNotFound(true);
+    setAdminOpen(false);
+    try {
+      window.history.pushState(null, '', '#/404');
+    } catch {
+      window.location.hash = '#/404';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -211,7 +245,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [selectedProduct]);
 
-  // URL Route Detection for Admin (/admin or #/admin or ?admin)
+  // URL Route Detection for Admin (/admin or #/admin or ?admin) and 404 Not Found
   useEffect(() => {
     const handleUrlRoute = () => {
       const pathname = window.location.pathname.toLowerCase();
@@ -224,6 +258,43 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (isAdminPath || isAdminHash || isAdminSearch) {
         setAdminOpen(true);
+        setIsNotFound(false);
+        return;
+      }
+
+      // Check for explicit 404 or unknown routes
+      const isExplicit404 =
+        pathname.endsWith('/404') ||
+        pathname.endsWith('/404.html') ||
+        pathname.endsWith('/not-found') ||
+        hash === '#404' ||
+        hash === '#/404' ||
+        hash.startsWith('#/404') ||
+        search.includes('page=404') ||
+        search.includes('error=404');
+
+      if (isExplicit404) {
+        setIsNotFound(true);
+        setAdminOpen(false);
+        return;
+      }
+
+      // Check whether current relative path points to an unknown non-root page
+      const segments = window.location.pathname.split('/').filter(Boolean);
+      const isRepoSubfolder = window.location.hostname.endsWith('github.io') && segments.length >= 1;
+      const relativeSegments = isRepoSubfolder ? segments.slice(1) : segments;
+
+      // Recognized paths: empty, index.html
+      const isKnownRoute =
+        relativeSegments.length === 0 ||
+        (relativeSegments.length === 1 && (relativeSegments[0] === 'index.html' || relativeSegments[0] === ''));
+
+      // If user is accessing an unrecognized subpath, e.g. /products/broken, show 404
+      if (!isKnownRoute) {
+        setIsNotFound(true);
+        setAdminOpen(false);
+      } else {
+        setIsNotFound(false);
       }
     };
 
@@ -239,7 +310,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Initial Database Load & Auto-seeding
   const loadData = async () => {
-    setIsLoadingProducts(true);
+    // Only display skeleton if products are not yet pre-loaded in memory
+    if (products.length === 0) {
+      setIsLoadingProducts(true);
+    }
     try {
       let [dbProducts, dbSettings, dbOrders] = await Promise.all([
         getProductsFromDb(),
@@ -247,26 +321,57 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         getOrdersFromDb(),
       ]);
 
+      // Check if existing database contains the old placeholder/demo products, vector SVGs, multiple variants, or old non-uploaded images
+      const needsCatalogRefresh = dbProducts.some(
+        (p) =>
+          p.title.includes('UltraDesk') ||
+          p.title.includes('AirPure') ||
+          p.title.includes('SwiftVolt') ||
+          p.title.includes('Lumina') ||
+          p.title.includes('Nomad') ||
+          !p.images ||
+          p.images.length === 0 ||
+          p.images.some((img) =>
+            img.includes('.svg') ||
+            img.includes('photo-1527864550417') ||
+            img.includes('chopper-detail') ||
+            img.includes('product-lifestyle') ||
+            img.includes('product-usage') ||
+            img.includes('product-washable') ||
+            img.includes('product-charging') ||
+            img.includes('product-blades')
+          ) ||
+          (p.variants && p.variants.length > 1) ||
+          p.images[0] !== '/products/Screenshot_20260901_134903_Meesho.jpg' ||
+          p.images.length !== 5 ||
+          !p.images.includes('/products/1788250324092.png') ||
+          !p.images.includes('/products/chopper-blades-precision.jpg') ||
+          !p.images.includes('/products/chopper-cordless-motor.jpg') ||
+          !p.images.includes('/products/chopper-washable-cleaning.jpg') ||
+          p.images.includes('/products/ms_booue_512_562653660.jpg') ||
+          p.images.includes('/products/ms_s2ioe_512_562653660.jpg') ||
+          p.images.includes('/products/1790336090475.png')
+      );
+
       let currentProducts = dbProducts;
-      if (currentProducts.length === 0) {
+      let currentOrders = dbOrders;
+
+      if (needsCatalogRefresh) {
         try {
-          currentProducts = await seedSolveSpaceCatalog();
+          // Immediately purge old demo products and replace with Wireless Electric Mini Food Chopper
+          const purgeResult = await purgeAllDataAndSeedChopper();
+          currentProducts = purgeResult.products;
+          currentOrders = purgeResult.orders;
         } catch (err) {
-          console.warn('Auto-seed products fallback:', err);
+          console.warn('Purge & seed mini chopper fallback:', err);
           currentProducts = SAMPLE_SOLVESPACE_PRODUCTS.map((p, idx) => ({ ...p, id: `seed_prod_${idx}` }));
         }
+      } else if (currentProducts.length === 0) {
+        currentProducts = SAMPLE_SOLVESPACE_PRODUCTS.map((p, idx) => ({ ...p, id: `seed_prod_${idx}` }));
       }
+
       setProducts(currentProducts);
       setPaymentSettings(dbSettings);
-
-      let currentOrders = dbOrders;
-      if (currentOrders.length === 0) {
-        try {
-          currentOrders = await seedInitialOrders();
-        } catch (err) {
-          console.warn('Initial orders seed notice:', err);
-        }
-      }
       setOrders(currentOrders);
     } catch (err) {
       console.error('Initial data load error:', err);
@@ -446,10 +551,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const added = await seedSolveSpaceCatalog();
       setProducts(added);
-      showToast('Catalog seeded with 5 premium SolveSpace solutions!', 'success');
+      showToast('Catalog seeded with Wireless Electric Mini Food Chopper!', 'success');
     } catch (e) {
       console.error(e);
       showToast('Failed to seed catalog', 'error');
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
+
+  const purgeAndResetChopper = async () => {
+    setIsLoadingProducts(true);
+    try {
+      const res = await purgeAllDataAndSeedChopper();
+      setProducts(res.products);
+      setOrders(res.orders);
+      showToast('Purged old demo products! Loaded Wireless Electric Mini Chopper catalog.', 'success');
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to purge data from backend', 'error');
     } finally {
       setIsLoadingProducts(false);
     }
@@ -620,6 +740,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setExchangePolicyModalOpen,
         setupBuilderOpen,
         setSetupBuilderOpen,
+        isNotFound,
+        setIsNotFound,
+        navigateToHome,
+        navigateTo404,
         adminOpen,
         setAdminOpen,
         isAdminAuthenticated,
@@ -657,6 +781,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         requestOrderExchange,
         updateOrderExchangeStatus,
         seedCatalog,
+        purgeAndResetChopper,
         refreshProducts,
         refreshOrders,
         reviews,

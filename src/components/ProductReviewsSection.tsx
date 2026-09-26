@@ -14,7 +14,9 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 }) => {
   const { reviews, addReview, showToast } = useStore();
 
-  const productReviews = reviews.filter((r) => r.productId === productId || r.productId === 'seed_prod_0');
+  const productReviews = reviews.filter(
+    (r) => r.productId === productId || r.productId === 'chopper_main_prod' || r.productId === 'seed_prod_0' || !productId
+  );
 
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
   const [filterRating, setFilterRating] = useState<number | 'all'>('all');

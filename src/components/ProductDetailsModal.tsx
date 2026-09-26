@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   X,
   Star,
@@ -41,6 +41,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
   const defaultEstimate = calculateDeliveryEstimate(false);
 
+  // Modal State
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [variantImageOverride, setVariantImageOverride] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
@@ -52,7 +53,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomCoords, setZoomCoords] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
   const [zoomLevel, setZoomLevel] = useState<number>(2.4);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   // Instant Indian Pincode Verification State
   const [pincodeInput, setPincodeInput] = useState('');
@@ -62,15 +62,67 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
   // Accordion toggles
   const [openAccordion, setOpenAccordion] = useState<string | null>('features');
 
+  // DOM and Touch Refs
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  // Computed Gallery Data
+  const galleryItems = useMemo(() => {
+    if (!product || !product.images) return [];
+    const detailsMap = new Map((product.imageDetails || []).map((d) => [d.url, d]));
+    return product.images.map((url, idx) => {
+      const detail = detailsMap.get(url);
+      return {
+        url,
+        label: detail?.label || detail?.title || `Angle ${idx + 1}`,
+        badge: detail?.badge || detail?.tag || (idx === 0 ? 'Flagship' : `Angle ${idx + 1}`),
+        description: detail?.description || '',
+        alt: detail?.alt || `${product.title} - View ${idx + 1}`,
+      };
+    });
+  }, [product]);
+
+  // Synchronize modal state on product changes
   useEffect(() => {
     if (product) {
       setActiveImageIdx(0);
-      setVariantImageOverride(product.variants?.[0]?.image || null);
+      setVariantImageOverride(null);
       setSelectedVariant(product.variants?.[0]);
       setQuantity(1);
       setIsZoomed(false);
     }
   }, [product]);
+
+  // Navigation Handlers
+  const handlePrevImage = () => {
+    if (!product || !product.images || product.images.length <= 1) return;
+    setIsZoomed(false);
+    setVariantImageOverride(null);
+    setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : product.images.length - 1));
+  };
+
+  const handleNextImage = () => {
+    if (!product || !product.images || product.images.length <= 1) return;
+    setIsZoomed(false);
+    setVariantImageOverride(null);
+    setActiveImageIdx((prev) => (prev < product.images.length - 1 ? prev + 1 : 0));
+  };
+
+  // Keyboard navigation for image gallery
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight') {
+        handleNextImage();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [product, activeImageIdx, onClose]);
 
   // Handle Zoom mouse movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -92,11 +144,36 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     setIsZoomed(false);
   };
 
-  // Touch device pan support
+  // Touch device pan and swipe support
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isZoomed) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isZoomed || touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartXRef.current - touchEndX;
+    const diffY = touchStartYRef.current - touchEndY;
+
+    // Horizontal swipe threshold: 45px
+    if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        handleNextImage();
+      } else {
+        handlePrevImage();
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!isZoomed || !e.touches[0]) return;
-    const rect = e.currentTarget.getBoundingClientRect();
     const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((touch.clientY - rect.top) / rect.height) * 100));
     setZoomCoords({ x, y });
@@ -105,27 +182,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
   const toggleZoom = () => {
     setIsZoomed((prev) => !prev);
   };
-
-  const handlePrevImage = () => {
-    if (!product || product.images.length <= 1) return;
-    setIsZoomed(false);
-    setVariantImageOverride(null);
-    setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : product.images.length - 1));
-  };
-
-  const handleNextImage = () => {
-    if (!product || product.images.length <= 1) return;
-    setIsZoomed(false);
-    setVariantImageOverride(null);
-    setActiveImageIdx((prev) => (prev < product.images.length - 1 ? prev + 1 : 0));
-  };
-
-  if (!product) return null;
-
-  const currentPrice = selectedVariant?.price ?? product.price;
-  const currentCompareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
-  const currentInventory = selectedVariant ? selectedVariant.inventory : product.inventory;
-  const isOutOfStock = currentInventory <= 0;
 
   // Instant Pincode Verification Trigger
   const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,14 +202,26 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart(product, selectedVariant, quantity);
   };
 
   const handleBuyNow = () => {
+    if (!product) return;
     addToCart(product, selectedVariant, quantity);
     onClose();
     setCheckoutModalOpen(true);
   };
+
+  if (!product) return null;
+
+  const activeImage = galleryItems[activeImageIdx] || galleryItems[0];
+  const currentImageUrl = variantImageOverride || activeImage?.url || product.images?.[0] || '';
+
+  const currentPrice = selectedVariant?.price ?? product.price;
+  const currentCompareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
+  const currentInventory = selectedVariant ? selectedVariant.inventory : product.inventory;
+  const isOutOfStock = currentInventory <= 0;
 
   const discountPercent =
     currentCompareAtPrice && currentCompareAtPrice > currentPrice
@@ -191,7 +259,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                   onMouseMove={handleMouseMove}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
+                  onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   onClick={toggleZoom}
                   className={`aspect-square w-full rounded-2xl bg-white overflow-hidden border border-slate-200 shadow-xs relative select-none group cursor-crosshair transition-shadow ${
                     isZoomed ? 'ring-2 ring-[#0B2545]/25 shadow-lg' : ''
@@ -202,8 +272,12 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                   {/* Scaled Product Image */}
                   <img
                     src={variantImageOverride || product.images[activeImageIdx] || product.images[0]}
-                    alt={product.title}
-                    className="w-full h-full object-cover object-center pointer-events-none transition-transform duration-100 ease-out will-change-transform"
+                    alt={
+                      (product.imageDetails?.find((d) => d.url === (variantImageOverride || product.images[activeImageIdx]))?.label) ||
+                      product.imageDetails?.[activeImageIdx]?.label ||
+                      product.title
+                    }
+                    className="w-full h-full object-contain object-center pointer-events-none transition-transform duration-100 ease-out will-change-transform"
                     style={{
                       transformOrigin: `${zoomCoords.x}% ${zoomCoords.y}%`,
                       transform: isZoomed ? `scale(${zoomLevel})` : 'scale(1)',
@@ -221,12 +295,22 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     />
                   )}
 
-                  {/* Discount Badge */}
-                  {discountPercent && (
-                    <div className="absolute top-3 left-3 bg-[#FF5A36] text-white text-xs font-black px-2.5 py-1 rounded-full shadow-md shadow-orange-500/20 pointer-events-none z-10">
-                      {discountPercent}% OFF
-                    </div>
-                  )}
+                  {/* Top-Left Image Badges (Index Counter, Feature Tag, and Discount) */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10 pointer-events-none">
+                    <span className="bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                      {activeImageIdx + 1} / {product.images.length}
+                    </span>
+                    {(product.imageDetails?.[activeImageIdx]?.badge) && (
+                      <span className="bg-[#0B2545]/90 backdrop-blur-md text-sky-200 text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md border border-sky-400/20">
+                        {product.imageDetails[activeImageIdx].badge}
+                      </span>
+                    )}
+                    {discountPercent && (
+                      <span className="bg-[#FF5A36] text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md shadow-orange-500/20">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                  </div>
 
                   {/* Top-Right Direct Zoom Toggle Button */}
                   <button
@@ -246,18 +330,26 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     )}
                   </button>
 
+                  {/* Bottom-Left Feature Detail Callout Pill */}
+                  {product.imageDetails?.[activeImageIdx] && !isZoomed && (
+                    <div className="absolute bottom-3 left-3 right-auto max-w-[calc(100%-80px)] z-10 bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-md border border-white/10 pointer-events-none truncate flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                      <span className="text-sky-300 font-bold shrink-0">Angle {activeImageIdx + 1}:</span>
+                      <span className="truncate">{product.imageDetails[activeImageIdx].label}</span>
+                    </div>
+                  )}
+
                   {/* Bottom-Right Zoom Info Pill */}
                   <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-md pointer-events-none transition-all">
                     {isZoomed ? (
                       <>
                         <ZoomOut className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                        <span>{zoomLevel}x Zoom • Click to Reset</span>
+                        <span>{zoomLevel}x Zoom</span>
                       </>
                     ) : (
                       <>
                         <ZoomIn className="w-3.5 h-3.5 text-slate-300" />
-                        <span className="hidden sm:inline">Hover to inspect texture</span>
-                        <span className="sm:hidden">Tap to inspect</span>
+                        <span className="hidden sm:inline">Inspect</span>
                       </>
                     )}
                   </div>
@@ -314,10 +406,10 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                   )}
                 </div>
 
-                {/* Thumbnail strip */}
+                {/* Mobile Dot Navigation */}
                 {product.images.length > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                    {product.images.map((img, idx) => (
+                  <div className="flex items-center justify-center gap-1.5 sm:hidden py-0.5">
+                    {product.images.map((_, idx) => (
                       <button
                         key={idx}
                         onClick={() => {
@@ -325,15 +417,105 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                           setVariantImageOverride(null);
                           setIsZoomed(false);
                         }}
-                        className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
+                        className={`h-2 rounded-full transition-all cursor-pointer ${
                           !variantImageOverride && activeImageIdx === idx
-                            ? 'border-[#0B2545] shadow-xs scale-102 ring-2 ring-[#0B2545]/20'
-                            : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
+                            ? 'w-6 bg-[#0B2545]'
+                            : 'w-2 bg-slate-300 hover:bg-slate-400'
                         }`}
-                      >
-                        <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
-                      </button>
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
                     ))}
+                  </div>
+                )}
+
+                {/* Dynamic 5-Thumbnail Strip with Visual Badges */}
+                {product.images.length > 1 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-0.5">
+                      <span>Gallery ({product.images.length} Unique Angles)</span>
+                      <span className="text-[11px] text-slate-400 hidden sm:inline">Use ← → keys to navigate</span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2 pb-1">
+                      {product.images.map((img, idx) => {
+                        const detail = product.imageDetails?.find((d) => d.url === img) || product.imageDetails?.[idx];
+                        const isSelected = !variantImageOverride && activeImageIdx === idx;
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setActiveImageIdx(idx);
+                              setVariantImageOverride(null);
+                              setIsZoomed(false);
+                            }}
+                            className={`group relative flex flex-col rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white text-left ${
+                              isSelected
+                                ? 'border-[#0B2545] shadow-xs scale-102 ring-2 ring-[#0B2545]/20'
+                                : 'border-slate-200 opacity-80 hover:opacity-100 hover:border-slate-400'
+                            }`}
+                            title={detail ? `${detail.label}: ${detail.description || ''}` : `Angle ${idx + 1}`}
+                          >
+                            <div className="aspect-square w-full relative bg-slate-50 flex items-center justify-center p-1">
+                              <img
+                                src={img}
+                                alt={detail?.label || `Thumbnail ${idx + 1}`}
+                                className="w-full h-full object-contain pointer-events-none"
+                              />
+                              <span
+                                className={`absolute top-1 left-1 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                                  isSelected
+                                    ? 'bg-[#0B2545] text-white'
+                                    : 'bg-slate-900/60 text-white group-hover:bg-slate-900'
+                                }`}
+                              >
+                                {idx + 1}
+                              </span>
+                            </div>
+                            {detail?.label && (
+                              <div className="px-1 py-1 border-t border-slate-100 bg-white hidden sm:block">
+                                <p className={`text-[9px] font-bold leading-tight truncate ${isSelected ? 'text-[#0B2545]' : 'text-slate-600'}`}>
+                                  {detail.label.split(' ')[0]} {detail.label.split(' ')[1] || ''}
+                                </p>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Active Angle Spotlight Card */}
+                    {(() => {
+                      const currentDetail =
+                        product.imageDetails?.find((d) => d.url === (variantImageOverride || product.images[activeImageIdx])) ||
+                        product.imageDetails?.[activeImageIdx];
+                      if (!currentDetail) return null;
+                      return (
+                        <div className="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200/90 shadow-2xs mt-2 transition-all">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#0B2545] text-white text-[10px] font-black shrink-0">
+                                {activeImageIdx + 1}
+                              </span>
+                              <h4 className="text-xs font-bold text-slate-900 truncate">
+                                {currentDetail.label}
+                              </h4>
+                              {currentDetail.badge && (
+                                <span className="bg-sky-100 text-sky-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-md hidden sm:inline-block">
+                                  {currentDetail.badge}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 shrink-0 uppercase tracking-wide">
+                              Angle {activeImageIdx + 1} of {product.images.length}
+                            </span>
+                          </div>
+                          {currentDetail.description && (
+                            <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                              {currentDetail.description}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -426,8 +608,10 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 {product.variants && product.variants.length > 0 && (
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800">Select Edition / Variant:</span>
-                      <span className="text-slate-500">{selectedVariant?.name}</span>
+                      <span className="font-bold text-slate-800">
+                        {product.variants.length === 1 ? 'Capacity / Variant:' : 'Select Edition / Variant:'}
+                      </span>
+                      <span className="text-slate-500 font-medium">{selectedVariant?.name}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {product.variants.map((v) => (
@@ -440,14 +624,15 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             }
                             setIsZoomed(false);
                           }}
-                          className={`min-h-[48px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
+                          className={`min-h-[48px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 flex items-center gap-2 ${
                             selectedVariant?.id === v.id
                               ? 'border-[#0B2545] bg-[#0B2545] text-white shadow-xs'
                               : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
                           }`}
                         >
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
                           <span>{v.name}</span>
-                          <span className="ml-1.5 opacity-80">({formatCurrency(v.price)})</span>
+                          <span className="ml-1 opacity-80 font-normal">({formatCurrency(v.price)})</span>
                         </button>
                       ))}
                     </div>

@@ -133,25 +133,28 @@ export async function handleApiRoute(
       const body = await parseJsonBody(req);
       const { messages, context } = body;
 
-      const systemInstruction = `You are "SS AI", the premier AI Workspace Architect & Ergonomic Consultant for SolveSpace India (https://solvespace.in). SolveSpace India is an elite Indian engineering and ergonomic brand dedicated to elevated workspace setups, minimalist productivity hardware, and high-performance lifestyle technology for Indian professionals.
+      const systemInstruction = `You are "SS AI", the dedicated AI Product Expert & Culinary Tech Consultant for SolveSpace India (https://solvespace.in). SolveSpace India is an elite Indian consumer technology and smart home brand engineered for modern, fast-paced Indian lifestyles.
 
-Your Core Capabilities & Intelligence:
-1. Deep Ergonomic Reasoning:
-   - Provide exact advice on posture alignment, cervical neck strain relief (elevating laptop screens to eye level), wrist pronation, and eye fatigue (using 45-degree asymmetric lighting with zero screen reflection).
-   - Tailor recommendations for specific Indian workplace scenarios (WFH setups, compact Bangalore/Mumbai apartments, dual-screen engineering rigs, and creative studios).
-2. Live Store Catalog Mastery:
-   - You have access to SolveSpace India's exact catalog items via the provided context.
-   - When suggesting products, mention their exact title, key architectural materials (e.g. aerospace-grade CNC aluminum, GaN III gallium nitride, Cordura® ballistic nylon), and real value.
-   - Whenever you recommend one or more products from the catalog, add tag(s) in this format at the end or in context: [RECOMMEND: <exact product title>] so our interactive UI can render 1-click live product action cards for the customer.
-3. Indian Logistics & Policies:
-   - Express courier dispatch across 28,000+ Indian pincodes (Next-day to 48 hrs in metros like Bengaluru, Mumbai, Delhi-NCR, Hyderabad, Chennai, Pune; 3-5 days for others).
-   - Payments: Cashfree Gateway (Instant UPI, PhonePe, GPay, Cards, NetBanking) and Cash on Delivery (COD).
-   - POLICY: 5-Day Doorstep Product Exchange & Replacement for defects, transit issues, or size changes. We operate strictly on an exchange basis; no monetary cash refunds.
-   - Confidentiality: Never mention third-party suppliers or marketplaces. Represent SolveSpace India as an independent, precision-crafted brand.
+Your Core Catalog & Expertise:
+1. Flagship Product: "Wireless Electric Mini Food Chopper & Garlic Mincer"
+   - Price: ₹899 (Launch offer, MRP ₹1,499 with 40% discount).
+   - Blades: High-grade 304 food-grade stainless steel triple-layer S-curve blades for multi-angle cyclone cutting.
+   - Motor: High-torque 30W motor with 1-touch ergonomic pulse control (press to chop, release to stop).
+   - Battery & Charging: Cordless lithium battery offering 35+ chopping sessions per charge with silicone-sealed water-resistant USB charging.
+   - Capacity: 100% food-grade BPA-free 250ml container bowl.
+   - Applications: Mincing whole garlic cloves, onions (no tears!), ginger, green chilies, nuts, herbs, and infant baby purees in under 10 seconds.
+   - Maintenance: IPX6 detachable modular design for instant 5-second tap water rinsing. Zero food traps.
+2. Store Logistics & Indian Policies:
+   - Express courier dispatch via Delhivery & Blue Dart across 28,000+ Indian pincodes (Next-day in Bengaluru; 2-3 days in metros like Mumbai, Delhi-NCR, Hyderabad, Chennai, Pune; 3-5 days for others).
+   - Payments: Cashfree Instant UPI (PhonePe, Google Pay, Paytm, Cards, NetBanking) and Cash on Delivery (COD). Free delivery on orders over ₹999 (standard fee ₹99).
+   - Policy: 5-Day Doorstep Product Exchange & Replacement for defects or transit issues. We operate strictly on an exchange/replacement basis.
+   - Confidentiality: Never mention third-party marketplaces (e.g. Meesho, Amazon). Represent SolveSpace India as an independent, precision-engineered brand.
+3. Interactive Recommendations:
+   - Whenever you recommend a product from the catalog, include a tag in this exact format: [RECOMMEND: Wireless Electric Mini Food Chopper & Garlic Mincer] so our interactive UI renders a 1-click live product card.
 
 Tone & Style:
-- Confident, deeply technical yet accessible, sophisticated, concise, and helpful.
-- Avoid repetitive generic fluff; provide actionable guidance, clear bullet points, and exact specifications.`;
+- Warm, polite ("Namaste!"), knowledgeable, concise, and helpful.
+- Provide crisp, actionable advice with bullet points for easy reading.`;
 
       // Convert messages to Gemini contents format
       const formattedContents = (messages || []).map((m: any) => ({
@@ -177,13 +180,13 @@ Tone & Style:
       sendJson(res, 200, {
         reply:
           generatedReply ||
-          "Welcome to SolveSpace India! We offer 24-48hr express courier dispatch across India, 5-Day doorstep product exchange, and Cash on Delivery. Whether you need ergonomic desk setups, cable organizers, or high-power GaN docks, how can I assist you today?",
+          "Namaste! Welcome to SolveSpace India. Our flagship Wireless Electric Mini Food Chopper minces garlic, onions, and veggies in under 10 seconds with 304 stainless steel triple blades and cordless USB-C charging. We offer express dispatch across 28,000+ Indian pincodes, Cash on Delivery, and 5-Day doorstep exchange! How can I assist you today?\n\n[RECOMMEND: Wireless Electric Mini Food Chopper & Garlic Mincer]",
       });
     } catch (err: any) {
       console.warn('Gemini Chat handled gracefully:', err?.message || err);
       sendJson(res, 200, {
         reply:
-          "Welcome to SolveSpace India! We offer fast express shipping across 28,000+ Indian pincodes with Cash on Delivery and doorstep product replacements. How can I help you choose the best workspace setup today?",
+          "Namaste! Welcome to SolveSpace India. We offer express dispatch across 28,000+ Indian pincodes with Cash on Delivery and 5-Day doorstep product replacement. How can I help you with our Wireless Electric Mini Chopper today?\n\n[RECOMMEND: Wireless Electric Mini Food Chopper & Garlic Mincer]",
       });
     }
     return true;
@@ -198,36 +201,36 @@ Tone & Style:
 
     const fallbackInsights = [
       {
-        title: 'Optimize COD Confirmation via WhatsApp / SMS',
+        title: 'Free Shipping Threshold Upsell (₹899 → ₹999)',
+        category: 'revenue',
+        type: 'opportunity',
+        impact: 'high',
+        description: 'At the ₹899 selling price, customers are just ₹100 away from unlocking ₹999 free express delivery across India.',
+        actionableStep: 'Promote spare 304 stainless replacement blades or a 350ml expansion bowl (₹199–₹299) directly in the Cart Drawer to boost Average Order Value.',
+      },
+      {
+        title: 'Automate WhatsApp COD Verification for Kitchen Gadgets',
         category: 'cro',
         type: 'opportunity',
         impact: 'high',
-        description: 'Cash on Delivery orders in India experience up to 25% lower Return-to-Origin (RTO) when instant automated verification is active.',
-        actionableStep: 'Keep the 1-click COD confirmation workflow active to lock in intent before dispatching orders.',
+        description: 'Kitchen appliances in India experience over 60% Cash on Delivery checkout preference. Automated OTP confirmation locks in customer intent.',
+        actionableStep: 'Keep the 1-click COD confirmation active to reduce Return-to-Origin (RTO) delivery failures by up to 28%.',
       },
       {
-        title: 'Express Delivery Threshold Driving Higher AOV',
-        category: 'revenue',
-        type: 'tip',
-        impact: 'medium',
-        description: 'Your ₹999 free express shipping bar incentivizes Indian shoppers to add complementary accessories to qualify.',
-        actionableStep: 'Promote desk accessories or cable ties priced between ₹299–₹499 right inside the mini-cart drawer.',
-      },
-      {
-        title: 'Prevent Stockout on Fast-Moving SKUs',
+        title: 'Maintain 40+ Unit Inventory Buffer on 250ml Chopper',
         category: 'inventory',
         type: 'warning',
         impact: 'high',
-        description: 'Top-selling 100W GaN chargers and desk organizers are hitting lower threshold buffers.',
-        actionableStep: 'Reorder 50 units minimum to safeguard against 4-day supplier lead times.',
+        description: 'The Matte Black 250ml mini chopper is the primary flagship SKU with high seasonal search intent for daily meal prep.',
+        actionableStep: 'Set reorder alerts when inventory drops below 15 units to account for 3–5 day regional supplier replenishment.',
       },
       {
-        title: 'Leverage UPI & Instant Cashfree Gateway',
+        title: 'Drive UPI Pre-Payments via Cashfree Instant Checkout',
         category: 'marketing',
-        type: 'opportunity',
+        type: 'tip',
         impact: 'medium',
-        description: 'Indian shoppers prefer QR/UPI payments for 80%+ higher payment success rates compared to debit cards.',
-        actionableStep: 'Maintain Cashfree toggle enabled to support UPI autopay and zero friction checkouts.',
+        description: 'Indian shoppers paying through PhonePe, GPay, or Paytm UPI complete checkouts in under 20 seconds with 94%+ payment success.',
+        actionableStep: 'Highlight "Instant UPI Available" on the product detail page and checkout modal to increase prepaid order share.',
       },
     ];
 

@@ -31,6 +31,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenAuth }) => {
     setCartDrawerOpen,
     setExchangePolicyModalOpen,
     cartCount,
+    navigateToHome,
   } = useStore();
 
   const { user, logout } = useAuth();
@@ -47,6 +48,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenAuth }) => {
   const handleCategorySelect = (cat: string) => {
     setSelectedCategory(cat);
     setMobileMenuOpen(false);
+    navigateToHome();
   };
 
   return (
@@ -159,7 +161,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenAuth }) => {
                 </div>
               </button>
 
-              {/* Workspace Studio Builder Trigger */}
+              {/* Kitchen Combo Builder Trigger */}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -171,7 +173,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenAuth }) => {
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="flex-1 flex items-center justify-between">
-                  <span>Custom Workspace Builder</span>
+                  <span>Kitchen Combo Builder</span>
                   <span className="text-[10px] bg-orange-100 text-orange-800 font-extrabold px-1.5 py-0.5 rounded-sm">
                     15% OFF
                   </span>

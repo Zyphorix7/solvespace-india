@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <!-- Solvespace India Official Favicon -->
+  <!-- Solvespace India Official Logomark -->
   <g transform="translate(6, 2)">
+    <!-- 1. Left Hexagon Outer Shell & Bulb Shoulder (Navy) -->
     <path
       d="M38 78L26 66L20 54V32L46 16L58 23"
       stroke="#003B5C"
@@ -8,6 +9,8 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
+
+    <!-- 2. Orange Bulb Body & Right Hexagon Wall -->
     <path
       d="M62 25L72 32V54L66 66L54 78"
       stroke="#F58220"
@@ -15,12 +18,16 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
+
+    <!-- 3. Inner Orange Bulb Contour -->
     <path
       d="M66 52C66 40 58 34 50 34"
       stroke="#F58220"
       stroke-width="6"
       stroke-linecap="round"
     />
+
+    <!-- 4. Breakthrough Zigzag Growth Trend Line (Navy) -->
     <path
       d="M23 48L33 58L45 44L56 56L82 20"
       stroke="#003B5C"
@@ -28,6 +35,8 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
+
+    <!-- 5. Upward Arrowhead (Navy) -->
     <path
       d="M64 20H82V38"
       stroke="#003B5C"
@@ -35,6 +44,8 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
+
+    <!-- 6. Bulb Socket Base (Navy) -->
     <path
       d="M38 86H54"
       stroke="#003B5C"

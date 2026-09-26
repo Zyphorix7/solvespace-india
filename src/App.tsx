@@ -20,6 +20,9 @@ import { Toast } from './components/Toast';
 import { SolveSpaceLogo } from './components/SolveSpaceLogo';
 import { ExchangePolicyModal } from './components/ExchangePolicyModal';
 import { BrandKitModal } from './components/BrandKitModal';
+import { NotFoundPage } from './components/NotFoundPage';
+import { recordVisitorHit } from './services/analytics';
+import { ScrollReveal, StaggerContainer } from './components/ScrollReveal';
 import {
   ShieldCheck,
   Truck,
@@ -51,6 +54,9 @@ const StoreContent: React.FC = () => {
     setTrackOrderModalOpen,
     setupBuilderOpen,
     setSetupBuilderOpen,
+    isNotFound,
+    navigateToHome,
+    navigateTo404,
     adminOpen,
     isAdminAuthenticated,
     loginAdmin,
@@ -62,6 +68,7 @@ const StoreContent: React.FC = () => {
   const productsRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    recordVisitorHit();
     const handleOpenBrandKit = () => setBrandKitOpen(true);
     window.addEventListener('open-brand-kit', handleOpenBrandKit);
     return () => window.removeEventListener('open-brand-kit', handleOpenBrandKit);
@@ -81,6 +88,40 @@ const StoreContent: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
+  // Dedicated custom 404 page rendering
+  if (isNotFound) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-[#FF5A36] selection:text-white">
+        <NotFoundPage onBackToHome={navigateToHome} />
+
+        {/* Global Overlays & Modals active on 404 page */}
+        <CartDrawer />
+        <MobileDrawer onOpenAuth={() => setAuthModalOpen(true)} />
+        {selectedProduct && (
+          <ProductDetailsModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+          />
+        )}
+        <CheckoutModal />
+        <DeskSetupBuilderModal
+          isOpen={setupBuilderOpen}
+          onClose={() => setSetupBuilderOpen(false)}
+        />
+        <TrackOrderModal />
+        <ExchangePolicyModal
+          isOpen={exchangePolicyModalOpen}
+          onClose={() => setExchangePolicyModalOpen(false)}
+          onOpenTrackOrder={() => setTrackOrderModalOpen(true)}
+        />
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+        <BrandKitModal isOpen={brandKitOpen} onClose={() => setBrandKitOpen(false)} />
+        <GeminiChatbot />
+        <Toast />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-[#FF5A36] selection:text-white">
       {/* Universal Header with SolveSpace Branding & Cart Counter */}
@@ -92,70 +133,76 @@ const StoreContent: React.FC = () => {
       {/* Main Content Area */}
       <main ref={productsRef} className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-10">
         
-        {/* Workspace Builder Interactive Banner (Unique Feature) */}
-        <section className="relative overflow-hidden bg-linear-to-r from-[#0B2545] via-[#133E68] to-[#0B2545] rounded-3xl p-6 sm:p-8 text-white shadow-xl">
-          <div className="absolute right-0 top-0 w-80 h-80 bg-[#FF5A36]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#FF5A36] text-xs font-black uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Interactive Studio Configurator</span>
+        {/* Wireless Mini Chopper Featured Deal Banner */}
+        <ScrollReveal animation="scale-up" duration={750} distance={20}>
+          <section className="relative overflow-hidden bg-linear-to-r from-[#0B2545] via-[#133E68] to-[#0B2545] rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+            <div className="absolute right-0 top-0 w-80 h-80 bg-[#FF5A36]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#FF5A36] text-xs font-black uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Special Launch Offer</span>
+                </div>
+                <h2 className="text-xl sm:text-3xl font-black tracking-tight">
+                  Wireless Electric Mini Food Chopper & Garlic Mincer
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Cordless USB rechargeable food processor with 3-tier 304 food-grade stainless steel blades. Mince garlic, onions, ginger, and nuts in under 10 seconds.
+                </p>
               </div>
-              <h2 className="text-xl sm:text-3xl font-black tracking-tight">
-                Design Your Complete Dream Desk Setup
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Combine the CNC Aluminum Riser, 100W GaN Charging Hub, Dual ScreenBar, and HEPA Purifier. Instant 15% Workspace Bundle Discount automatically applied.
-              </p>
+              <button
+                onClick={() => {
+                  if (products[0]) setSelectedProduct(products[0]);
+                }}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FF5A36] hover:bg-[#E04826] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <span>Explore Features & Buy Now</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => setSetupBuilderOpen(true)}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FF5A36] hover:bg-[#E04826] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-all cursor-pointer shrink-0"
-            >
-              <span>Launch Setup Builder</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
         {/* Category Navigation Pills */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Engineered Workstation Solutions</span>
-              <span className="text-xs font-bold text-slate-400 font-mono">
-                ({filteredProducts.length})
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Tested for Indian 230V surges, dust, and compact metropolitan spaces.
-            </p>
-          </div>
+        <ScrollReveal animation="fade-up" distance={16} duration={600}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Featured Products</span>
+                <span className="text-xs font-bold text-slate-400 font-mono">
+                  ({filteredProducts.length})
+                </span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Cordless innovation, 304 food-grade stainless steel & USB fast charging.
+              </p>
+            </div>
 
-          {/* Category Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-            {['All', 'Desk & Workspace', 'Tech & Mobility', 'Home & Wellness'].map(
-              (cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedCategory === cat
-                      ? 'bg-[#0B2545] text-white shadow-sm'
-                      : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  {cat}
-                </button>
-              )
-            )}
+            {/* Dynamic Category Filter Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              {['All', ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))].map(
+                (cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      selectedCategory === cat
+                        ? 'bg-[#0B2545] text-white shadow-sm'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                )
+              )}
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Products Grid */}
-        {isLoadingProducts ? (
+        {isLoadingProducts && products.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2].map((i) => (
               <div
                 key={i}
                 className="bg-white rounded-2xl p-4 border border-slate-200 animate-pulse space-y-4"
@@ -168,7 +215,13 @@ const StoreContent: React.FC = () => {
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+          <StaggerContainer
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
+            staggerDelay={75}
+            baseDelay={40}
+            animation="fade-up"
+            distance={24}
+          >
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
@@ -176,21 +229,27 @@ const StoreContent: React.FC = () => {
                 onOpenDetails={setSelectedProduct}
               />
             ))}
-          </div>
+          </StaggerContainer>
         ) : (
-          /* Empty Search / Catalog State */
+          /* Empty Search / Filter State */
           <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-xs">
             <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
               <Package className="w-8 h-8" />
             </div>
             <div className="space-y-1">
               <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {searchQuery ? 'No Solutions Matched Your Query' : 'SolveSpace India Catalog Ready'}
+                {searchQuery
+                  ? 'No Products Matched Your Search'
+                  : selectedCategory !== 'All'
+                  ? `No Products In "${selectedCategory}"`
+                  : 'Catalog Ready'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 {searchQuery
-                  ? 'Try searching with different keywords like "organizer", "charger", or "purifier".'
-                  : 'The application is initialized clean. You can reload 5 curated SolveSpace products below.'}
+                  ? `No items found matching "${searchQuery}". Try searching for "chopper", "garlic", or "mincer".`
+                  : selectedCategory !== 'All'
+                  ? 'View all available items to discover our flagship food chopper.'
+                  : 'Click below to reload the mini chopper product.'}
               </p>
             </div>
 
@@ -202,12 +261,19 @@ const StoreContent: React.FC = () => {
                 >
                   Clear Search
                 </button>
+              ) : selectedCategory !== 'All' ? (
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className="min-h-[48px] px-6 py-2.5 bg-[#0B2545] text-white text-xs font-bold rounded-xl active:scale-95 cursor-pointer"
+                >
+                  View All Products
+                </button>
               ) : (
                 <button
                   onClick={seedCatalog}
                   className="w-full sm:w-auto min-h-[48px] px-6 py-2.5 bg-[#FF5A36] hover:bg-[#E04826] text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 cursor-pointer"
                 >
-                  Seed 5 SolveSpace Products
+                  Reload Chopper Product
                 </button>
               )}
             </div>
@@ -215,55 +281,61 @@ const StoreContent: React.FC = () => {
         )}
 
         {/* Recently Viewed Shelf (Shopify / Plusbase Style) */}
-        <RecentlyViewedShelf />
+        <ScrollReveal animation="fade-up" delay={60}>
+          <RecentlyViewedShelf />
+        </ScrollReveal>
 
         {/* Brand Engineering Story & Quality Section */}
         <section className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-xs overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#FF5A36] uppercase tracking-wider">
-                <Layers className="w-3.5 h-3.5" />
-                <span>The SolveSpace Standard</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Crafted for India’s Ambition & Workplace Demands.
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Generic imports fail under Indian electrical fluctuations and tropical humidity. SolveSpace India re-engineers every desk accessory with BIS surge protection, medical-grade H13 HEPA seals, and aerospace aluminum alloys for lifelong durability.
-              </p>
+            <ScrollReveal animation="fade-right" duration={750} distance={28}>
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#FF5A36] uppercase tracking-wider">
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>The SolveSpace Standard</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                  Crafted for India’s Ambition & Workplace Demands.
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Generic imports fail under Indian electrical fluctuations and tropical humidity. SolveSpace India re-engineers every desk accessory with BIS surge protection, medical-grade H13 HEPA seals, and aerospace aluminum alloys for lifelong durability.
+                </p>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="text-lg font-black text-[#0B2545]">100%</div>
-                  <div className="text-xs text-slate-600 font-semibold">BIS Safety Compliant</div>
-                </div>
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="text-lg font-black text-[#0B2545]">1-Year</div>
-                  <div className="text-xs text-slate-600 font-semibold">Pan-India Replacement</div>
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="text-lg font-black text-[#0B2545]">100%</div>
+                    <div className="text-xs text-slate-600 font-semibold">BIS Safety Compliant</div>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="text-lg font-black text-[#0B2545]">1-Year</div>
+                    <div className="text-xs text-slate-600 font-semibold">Pan-India Replacement</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=900&q=80"
-                alt="SolveSpace Precision Workspace"
-                className="w-full h-80 object-cover rounded-2xl shadow-lg border border-slate-200"
-              />
-              <div className="absolute -bottom-4 -left-4 bg-[#0B2545] text-white p-4 rounded-2xl shadow-xl max-w-xs border border-white/10 hidden sm:block">
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                  Guaranteed Quality
-                </div>
-                <div className="text-xs text-slate-200 mt-1">
-                  100% Genuine Materials. Direct from Bengaluru & Mumbai logistics hubs.
+            <ScrollReveal animation="fade-left" duration={750} delay={120} distance={28}>
+              <div className="relative">
+                <img
+                  src="/products/Screenshot_20260901_134903_Meesho.jpg"
+                  alt="SolveSpace Cordless Electric Mini Chopper"
+                  className="w-full h-80 object-contain bg-slate-50 p-3 rounded-2xl shadow-lg border border-slate-200"
+                />
+                <div className="absolute -bottom-4 -left-4 bg-[#0B2545] text-white p-4 rounded-2xl shadow-xl max-w-xs border border-white/10 hidden sm:block">
+                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    Guaranteed Quality
+                  </div>
+                  <div className="text-xs text-slate-200 mt-1">
+                    Food-grade BPA-free bowl & 304 stainless steel blades. Fast dispatch from Bengaluru & Mumbai hubs.
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* Customer Trust Badges */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4" staggerDelay={80} baseDelay={30} animation="fade-up" distance={20}>
           <div className="p-4 bg-white rounded-2xl border border-slate-200 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#0B2545] shrink-0">
               <Truck className="w-5 h-5" />
@@ -303,7 +375,7 @@ const StoreContent: React.FC = () => {
               <div className="text-[11px] text-slate-500">UPI, Cards & NetBanking</div>
             </div>
           </div>
-        </section>
+        </StaggerContainer>
 
       </main>
 
@@ -328,22 +400,31 @@ const StoreContent: React.FC = () => {
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-400">
                 <li
-                  onClick={() => setSelectedCategory('Desk & Workspace')}
+                  onClick={() => {
+                    setSelectedCategory('Kitchen & Home');
+                    scrollToProducts();
+                  }}
                   className="hover:text-white cursor-pointer transition-colors"
                 >
-                  Desk Organizers & Aluminum Risers
+                  Wireless Food Choppers & Mincers
                 </li>
                 <li
-                  onClick={() => setSelectedCategory('Tech & Mobility')}
+                  onClick={() => {
+                    setSelectedCategory('All');
+                    if (products[0]) setSelectedProduct(products[0]);
+                  }}
                   className="hover:text-white cursor-pointer transition-colors"
                 >
-                  GaN Chargers & ScreenBar Lamps
+                  304 Stainless Steel Blades
                 </li>
                 <li
-                  onClick={() => setSelectedCategory('Home & Wellness')}
+                  onClick={() => {
+                    setSelectedCategory('All');
+                    scrollToProducts();
+                  }}
                   className="hover:text-white cursor-pointer transition-colors"
                 >
-                  H13 HEPA Air Purifiers & Ergonomics
+                  USB-C Rechargeable Gadgets
                 </li>
               </ul>
             </div>
@@ -396,6 +477,14 @@ const StoreContent: React.FC = () => {
             <div className="flex items-center gap-4">
               <button
                 type="button"
+                onClick={navigateTo404}
+                className="hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                title="Preview Custom 404 Page"
+              >
+                <span>404 Page</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => setBrandKitOpen(true)}
                 className="hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
               >
@@ -428,10 +517,12 @@ const StoreContent: React.FC = () => {
       {/* Slide-over & Modal Overlays */}
       <CartDrawer />
       <MobileDrawer onOpenAuth={() => setAuthModalOpen(true)} />
-      <ProductDetailsModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
+      {selectedProduct && (
+        <ProductDetailsModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
       <CheckoutModal />
 
       {/* ADMIN SECURITY PORTAL & DASHBOARD */}

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" fill="none">
+  <!-- Solvespace India Official Brand Logo - White / Dark Mode -->
+  <g id="logomark" transform="translate(4, 2)">
+    <!-- 1. Left Hexagon Outer Shell & Bulb Shoulder (White) -->
+    <path
+      d="M38 78L26 66L20 54V32L46 16L58 23"
+      stroke="#FFFFFF"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 2. Orange Bulb Body & Right Hexagon Wall -->
+    <path
+      d="M62 25L72 32V54L66 66L54 78"
+      stroke="#F58220"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 3. Inner Orange Bulb Contour -->
+    <path
+      d="M66 52C66 40 58 34 50 34"
+      stroke="#F58220"
+      stroke-width="6"
+      stroke-linecap="round"
+    />
+
+    <!-- 4. Breakthrough Zigzag Growth Trend Line (White) -->
+    <path
+      d="M23 48L33 58L45 44L56 56L82 20"
+      stroke="#FFFFFF"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 5. Upward Arrowhead (White) -->
+    <path
+      d="M64 20H82V38"
+      stroke="#FFFFFF"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 6. Bulb Socket Base (White) -->
+    <path
+      d="M38 86H54"
+      stroke="#FFFFFF"
+      stroke-width="6"
+      stroke-linecap="round"
+    />
+    <path
+      d="M42 93H50"
+      stroke="#FFFFFF"
+      stroke-width="5"
+      stroke-linecap="round"
+    />
+  </g>
+
+  <!-- Typography -->
+  <g id="logotype">
+    <!-- SOLVESPACE Wordmark -->
+    <text
+      x="110"
+      y="50"
+      fill="#FFFFFF"
+      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Space Grotesk', sans-serif"
+      font-size="42"
+      font-weight="900"
+      letter-spacing="-0.5px"
+    >SOLVESPACE</text>
+
+    <!-- INDIA Subheading -->
+    <text
+      x="112"
+      y="80"
+      fill="#E2E8F0"
+      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif"
+      font-size="22"
+      font-weight="800"
+      letter-spacing="5px"
+    >INDIA</text>
+
+    <!-- Flowing Tricolor Ribbon Wave -->
+    <g id="tricolor-wave" transform="translate(225, 62)">
+      <!-- Saffron Top Ribbon -->
+      <path
+        d="M2 5C10 2 18 8 28 6C34 4.5 40 3 45 2.5C41 6 35 7.5 28 9C18 11 10 5 2 8Z"
+        fill="#FF671F"
+      />
+      <!-- White Middle Ribbon -->
+      <path
+        d="M2 8.5C10 5.5 18 11.5 28 9.5C34 8 40 6.5 45 6C41 9.5 35 11 28 12.5C18 14.5 10 8.5 2 11.5Z"
+        fill="#FFFFFF"
+        stroke="#E2E8F0"
+        stroke-width="0.3"
+      />
+      <!-- India Green Bottom Ribbon -->
+      <path
+        d="M2 12C10 9 18 15 28 13C34 11.5 40 10 45 9.5C41 13 35 14.5 28 16C18 18 10 12 2 15Z"
+        fill="#046A38"
+      />
+    </g>
+  </g>
+</svg>

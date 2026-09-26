@@ -2,6 +2,7 @@ import React from 'react';
 import { Eye, ArrowRight } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from './ProductCard';
+import { StaggerContainer } from './ScrollReveal';
 
 export const RecentlyViewedShelf: React.FC = () => {
   const { products, recentlyViewedIds, setSelectedProduct } = useStore();
@@ -26,11 +27,17 @@ export const RecentlyViewedShelf: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+      <StaggerContainer
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
+        staggerDelay={70}
+        baseDelay={40}
+        animation="fade-up"
+        distance={20}
+      >
         {viewedProducts.slice(0, 4).map((product) => (
           <ProductCard key={product.id} product={product} onOpenDetails={setSelectedProduct} />
         ))}
-      </div>
+      </StaggerContainer>
     </section>
   );
 };

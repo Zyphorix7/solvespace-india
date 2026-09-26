@@ -8,6 +8,16 @@ export interface ProductVariant {
   image?: string;
 }
 
+export interface ProductImageDetail {
+  url: string;
+  label: string;
+  title?: string;
+  badge?: string;
+  tag?: string;
+  alt?: string;
+  description?: string;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -16,6 +26,7 @@ export interface Product {
   price: number;
   compareAtPrice?: number;
   images: string[];
+  imageDetails?: ProductImageDetail[];
   category: string;
   inventory: number;
   sku?: string;
@@ -24,8 +35,17 @@ export interface Product {
   tags?: string[];
   features?: string[];
   variants?: ProductVariant[];
+  status?: 'active' | 'draft';
+  vendor?: string;
+  barcode?: string;
+  hsnCode?: string;
+  weightKg?: number;
+  costPerItem?: number;
   createdAt?: string;
   isFeatured?: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  slug?: string;
 }
 
 export interface CartItem {

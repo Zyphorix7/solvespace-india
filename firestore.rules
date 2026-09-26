@@ -1,6 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Test connection doc
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
     // Products: readable by all, writeable for catalog management & admin
     match /products/{productId} {
       allow read: if true;
@@ -13,10 +18,9 @@ service cloud.firestore {
       allow write: if true;
     }
     
-    // Orders: readable for order lookup & admin, creatable for guest/user checkout, updatable for tracking & status changes, protected against deletion
+    // Orders: readable for order lookup & admin, creatable for guest/user checkout, updatable for tracking & status changes, deletable for catalog management
     match /orders/{orderId} {
-      allow read, create, update: if true;
-      allow delete: if false;
+      allow read, create, update, delete: if true;
     }
 
     // Pincodes: read only

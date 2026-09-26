@@ -27,10 +27,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetails
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (product.variants && product.variants.length > 0) {
+    if (product.variants && product.variants.length > 1) {
       onOpenDetails(product);
     } else {
-      addToCart(product, undefined, 1);
+      addToCart(product, product.variants?.[0], 1);
       setIsAddedAnimation(true);
       setTimeout(() => setIsAddedAnimation(false), 1200);
     }
