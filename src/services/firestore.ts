@@ -176,10 +176,13 @@ export async function addProductToDb(product: Omit<Product, 'id'>): Promise<stri
   const path = 'products';
   try {
     const productsCol = collection(db, path);
-    const docRef = await addDoc(productsCol, {
-      ...product,
-      createdAt: new Date().toISOString(),
-    });
+    const docRef = await withTimeout(
+      addDoc(productsCol, {
+        ...product,
+        createdAt: new Date().toISOString(),
+      }),
+      6000
+    );
     return docRef.id;
   } catch (err) {
     handleFirestoreError(err, OperationType.CREATE, path);
@@ -191,7 +194,7 @@ export async function updateProductInDb(id: string, updates: Partial<Product>): 
   const path = `products/${id}`;
   try {
     const docRef = doc(db, 'products', id);
-    await updateDoc(docRef, updates);
+    await withTimeout(updateDoc(docRef, updates), 6000);
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, path);
     throw err;
@@ -202,7 +205,7 @@ export async function deleteProductFromDb(id: string): Promise<void> {
   const path = `products/${id}`;
   try {
     const docRef = doc(db, 'products', id);
-    await deleteDoc(docRef);
+    await withTimeout(deleteDoc(docRef), 6000);
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, path);
     throw err;
@@ -269,109 +272,7 @@ export async function createOrderInDb(orderData: Omit<Order, 'id'>): Promise<str
   }
 }
 
-export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [
-  {
-    orderNumber: 'SS-IN-984210',
-    customer: {
-      fullName: 'Priyanka Sen',
-      phoneNumber: '+91 98765 43210',
-      email: 'priyanka.sen@example.com',
-      addressLine1: 'Flat 402, Prestige Tower, Indiranagar',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560038',
-      landmark: 'Near Metro Station',
-    },
-    items: [
-      {
-        productId: 'chopper_main_prod',
-        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
-        variantName: 'Stealth Matte Black (250ml Bowl)',
-        quantity: 1,
-        price: 899,
-        image: '/products/Screenshot_20260901_134903_Meesho.jpg',
-      },
-    ],
-    subtotal: 899,
-    discount: 0,
-    shippingFee: 99,
-    totalAmount: 998,
-    paymentMethod: 'cashfree',
-    paymentStatus: 'paid',
-    orderStatus: 'delivered',
-    trackingNumber: 'DEL10982348IN',
-    courierName: 'Delhivery Surface',
-    estimatedDeliveryDate: 'Delivered',
-    exchangeStatus: 'none',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    orderNumber: 'SS-IN-984211',
-    customer: {
-      fullName: 'Pooja Iyer',
-      phoneNumber: '+91 98234 56789',
-      email: 'pooja.iyer@example.com',
-      addressLine1: '12-B, Marine View Apartments, Worli',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400018',
-    },
-    items: [
-      {
-        productId: 'chopper_main_prod',
-        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
-        variantName: 'Stealth Matte Black (250ml Bowl)',
-        quantity: 1,
-        price: 899,
-        image: '/products/1788250324092.png',
-      },
-    ],
-    subtotal: 899,
-    discount: 0,
-    shippingFee: 0,
-    totalAmount: 899,
-    paymentMethod: 'cashfree',
-    paymentStatus: 'paid',
-    orderStatus: 'shipped',
-    trackingNumber: 'BD74829103IN',
-    courierName: 'Blue Dart Air Express',
-    estimatedDeliveryDate: 'Tomorrow by 2:00 PM',
-    exchangeStatus: 'none',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    orderNumber: 'SS-IN-984212',
-    customer: {
-      fullName: 'Vikram Malhotra',
-      phoneNumber: '+91 97112 33445',
-      email: 'vikram.m@example.com',
-      addressLine1: 'Villa 14, DLF Phase 5, Golf Course Road',
-      city: 'Gurugram',
-      state: 'Haryana',
-      pincode: '122002',
-    },
-    items: [
-      {
-        productId: 'chopper_main_prod',
-        productTitle: 'Wireless Electric Mini Food Chopper & Garlic Mincer',
-        variantName: 'Stealth Matte Black (250ml Bowl)',
-        quantity: 2,
-        price: 899,
-        image: '/products/Screenshot_20260901_134903_Meesho.jpg',
-      },
-    ],
-    subtotal: 1798,
-    discount: 180,
-    shippingFee: 0,
-    totalAmount: 1618,
-    paymentMethod: 'cod',
-    paymentStatus: 'cod_pending',
-    orderStatus: 'processing',
-    estimatedDeliveryDate: '2-3 Business Days',
-    exchangeStatus: 'none',
-    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-  },
-];
+export const SAMPLE_INITIAL_ORDERS: Omit<Order, 'id'>[] = [];
 
 export async function updateOrderStatusInDb(
   orderId: string,

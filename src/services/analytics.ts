@@ -60,11 +60,11 @@ export function getStoredVisitorStats(): StoredVisitorStats {
       if (parsed.todayDate === today) {
         return parsed;
       } else {
-        // Roll over to new day
+        // Roll over to new day cleanly
         const updated: StoredVisitorStats = {
           todayDate: today,
-          todayCount: Math.max(1, parsed.todayCount > 0 ? Math.floor(Math.random() * 8) + 12 : 14),
-          todayPageViews: Math.max(1, parsed.todayPageViews > 0 ? Math.floor(Math.random() * 20) + 45 : 52),
+          todayCount: 1,
+          todayPageViews: 1,
           history: {
             ...parsed.history,
             [parsed.todayDate]: {
@@ -79,11 +79,11 @@ export function getStoredVisitorStats(): StoredVisitorStats {
     }
   } catch (_) {}
 
-  // Initial seed if first time
+  // Initial genuine stats for active session
   const initial: StoredVisitorStats = {
     todayDate: today,
-    todayCount: 28,
-    todayPageViews: 96,
+    todayCount: 1,
+    todayPageViews: 1,
     history: {},
   };
   try {
@@ -97,7 +97,7 @@ export function recordVisitorHit(): void {
   try {
     const stats = getStoredVisitorStats();
     stats.todayCount += 1;
-    stats.todayPageViews += Math.floor(Math.random() * 2) + 2;
+    stats.todayPageViews += 1;
     stats.history[stats.todayDate] = {
       visitors: stats.todayCount,
       pageViews: stats.todayPageViews,
@@ -168,24 +168,16 @@ export function computeRealtimeAnalytics(
     if (dateKey === stats.todayDate) {
       dayVisitors = stats.todayCount;
       dayPageViews = stats.todayPageViews;
-    } else if (stats.history[dateKey]) {
+    } else if (stats.history && stats.history[dateKey]) {
       dayVisitors = stats.history[dateKey].visitors;
       dayPageViews = stats.history[dateKey].pageViews;
     } else {
-      // Deterministic realistic baseline for past days if not recorded yet
-      const hash = dateKey.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const baseOrdersBonus = realOrders * 32;
-      dayVisitors = 45 + (hash % 38) + baseOrdersBonus;
-      dayPageViews = Math.round(dayVisitors * (2.8 + (hash % 10) * 0.1));
+      // Real historical recorded data or actual orders
+      dayVisitors = realOrders > 0 ? realOrders : 0;
+      dayPageViews = realOrders > 0 ? realOrders * 2 : 0;
     }
 
-    // Ensure visitors is always at least higher than orders
-    if (dayVisitors < realOrders * 5) {
-      dayVisitors = Math.max(dayVisitors, realOrders * 12 + 10);
-      dayPageViews = dayVisitors * 3;
-    }
-
-    const convRate = dayVisitors > 0 ? Number(((realOrders / dayVisitors) * 100).toFixed(2)) : 0;
+    const convRate = dayVisitors > 0 ? Number(((realOrders / dayVisitors) * 100).toFixed(2)) : (realOrders > 0 ? 100 : 0);
     const aov = realOrders > 0 ? Math.round(realRevenue / realOrders) : 0;
 
     dailyMetrics.push({
@@ -203,32 +195,24 @@ export function computeRealtimeAnalytics(
   // 2. Hourly metric for "Today"
   const hourlyMetrics: HourlyMetric[] = [];
   const currentHour = now.getHours();
-  
-  // Distribute today's orders & visitors across hours up to current hour
   const todayKey = now.toISOString().split('T')[0];
-  const todayOrderData = ordersByDate.get(todayKey) || { totalRevenue: 0, ordersCount: 0, paidCount: 0 };
   
   for (let h = 0; h <= 23; h++) {
     const hourLabel = `${h.toString().padStart(2, '0')}:00`;
     if (h <= currentHour) {
-      // Past or current hour today
-      const isPeakHour = (h >= 12 && h <= 15) || (h >= 19 && h <= 22);
-      const multiplier = isPeakHour ? 2.5 : h < 7 ? 0.3 : 1.2;
-      const hourlyVisitors = Math.max(1, Math.round((stats.todayCount / Math.max(currentHour + 1, 1)) * (multiplier / 1.5)));
-      
-      // Determine if an order happened in this window
       let hourlyOrders = 0;
       let hourlyRev = 0;
-      if (todayOrderData.ordersCount > 0) {
-        if (h === currentHour && todayOrderData.ordersCount >= 1) {
-          hourlyOrders = 1;
-          hourlyRev = Math.round(todayOrderData.totalRevenue / todayOrderData.ordersCount);
-        } else if (isPeakHour && todayOrderData.ordersCount > 1) {
-          hourlyOrders = Math.floor(todayOrderData.ordersCount / 3);
-          hourlyRev = Math.round(hourlyOrders * (todayOrderData.totalRevenue / todayOrderData.ordersCount));
-        }
-      }
+      orders.forEach((order) => {
+        try {
+          const od = new Date(order.createdAt);
+          if (od.toISOString().split('T')[0] === todayKey && od.getHours() === h) {
+            hourlyOrders += 1;
+            hourlyRev += Number(order.totalAmount || 0);
+          }
+        } catch (_) {}
+      });
 
+      const hourlyVisitors = h === currentHour ? stats.todayCount : (hourlyOrders > 0 ? hourlyOrders : 0);
       const convRate = hourlyVisitors > 0 ? Number(((hourlyOrders / hourlyVisitors) * 100).toFixed(1)) : 0;
       const aov = hourlyOrders > 0 ? Math.round(hourlyRev / hourlyOrders) : 0;
 
@@ -244,7 +228,7 @@ export function computeRealtimeAnalytics(
         aov,
       });
     } else {
-      // Future hour today (projected 0)
+      // Future hours today
       hourlyMetrics.push({
         date: todayKey,
         displayDate: hourLabel,
@@ -327,52 +311,63 @@ export function computeRealtimeAnalytics(
   // 4. Traffic Sources & Device breakdown
   const totalVisitorsInRange = dailyMetrics.reduce((sum, d) => sum + d.visitors, 0);
 
-  const trafficSources: TrafficSourceMetric[] = [
+  const trafficSources: TrafficSourceMetric[] = totalVisitorsInRange > 0 ? [
     {
-      name: 'Direct / SolveSpace Storefront',
-      visitors: Math.round(totalVisitorsInRange * 0.42),
-      percentage: 42,
+      name: 'Direct Storefront',
+      visitors: totalVisitorsInRange,
+      percentage: 100,
       color: '#0B2545',
     },
     {
-      name: 'Google Organic & Shopping',
-      visitors: Math.round(totalVisitorsInRange * 0.28),
-      percentage: 28,
+      name: 'Organic Search',
+      visitors: 0,
+      percentage: 0,
       color: '#F58220',
     },
     {
-      name: 'Instagram & Facebook Ads',
-      visitors: Math.round(totalVisitorsInRange * 0.18),
-      percentage: 18,
+      name: 'Social Media',
+      visitors: 0,
+      percentage: 0,
       color: '#8B5CF6',
     },
     {
-      name: 'WhatsApp Community & Referrals',
-      visitors: Math.round(totalVisitorsInRange * 0.12),
-      percentage: 12,
+      name: 'WhatsApp & Referrals',
+      visitors: 0,
+      percentage: 0,
       color: '#10B981',
     },
+  ] : [
+    { name: 'Direct Storefront', visitors: 0, percentage: 0, color: '#0B2545' },
+    { name: 'Organic Search', visitors: 0, percentage: 0, color: '#F58220' },
+    { name: 'Social Media', visitors: 0, percentage: 0, color: '#8B5CF6' },
+    { name: 'WhatsApp & Referrals', visitors: 0, percentage: 0, color: '#10B981' },
   ];
 
-  const deviceBreakdown: DeviceBreakdownMetric[] = [
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+
+  const deviceBreakdown: DeviceBreakdownMetric[] = totalVisitorsInRange > 0 ? [
     {
-      name: 'Mobile Smartphones',
-      percentage: 74,
-      visitors: Math.round(totalVisitorsInRange * 0.74),
+      name: isMobile ? 'Mobile Smartphone' : 'Desktop / Laptop',
+      percentage: 100,
+      visitors: totalVisitorsInRange,
       color: '#0B2545',
     },
     {
-      name: 'Desktop & Laptops',
-      percentage: 22,
-      visitors: Math.round(totalVisitorsInRange * 0.22),
+      name: isMobile ? 'Desktop & Laptops' : 'Mobile Smartphones',
+      percentage: 0,
+      visitors: 0,
       color: '#3B82F6',
     },
     {
       name: 'Tablets / iPads',
-      percentage: 4,
-      visitors: Math.round(totalVisitorsInRange * 0.04),
+      percentage: 0,
+      visitors: 0,
       color: '#94A3B8',
     },
+  ] : [
+    { name: 'Mobile Smartphones', percentage: 0, visitors: 0, color: '#0B2545' },
+    { name: 'Desktop & Laptops', percentage: 0, visitors: 0, color: '#3B82F6' },
+    { name: 'Tablets / iPads', percentage: 0, visitors: 0, color: '#94A3B8' },
   ];
 
   // 5. Aggregate KPI Summary
@@ -401,7 +396,7 @@ export function computeRealtimeAnalytics(
       aov: overallAOV,
       todayVisitors: stats.todayCount,
       todayPageViews: stats.todayPageViews,
-      activeLiveVisitors: Math.max(4, (stats.todayCount % 11) + 6), // Live pulse
+      activeLiveVisitors: stats.todayCount > 0 ? 1 : 0,
     },
   };
 }

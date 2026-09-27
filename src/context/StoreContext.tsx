@@ -2,6 +2,9 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { Product, CartItem, ProductVariant, PaymentSettings, Order, ProductReview } from '../types';
 import {
   getProductsFromDb,
+  addProductToDb,
+  updateProductInDb,
+  deleteProductFromDb,
   getPaymentSettingsFromDb,
   savePaymentSettingsToDb,
   getOrdersFromDb,
@@ -23,6 +26,8 @@ interface StoreContextType {
   paymentSettings: PaymentSettings;
   updatePaymentSettings: (newSettings: PaymentSettings) => Promise<void>;
   purgeAndResetChopper: () => Promise<void>;
+  saveProduct: (payload: Omit<Product, 'id'>, existingId?: string) => Promise<string>;
+  deleteProduct: (id: string) => Promise<void>;
   cart: CartItem[];
   cartDrawerOpen: boolean;
   setCartDrawerOpen: (open: boolean) => void;
@@ -575,6 +580,48 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // Optimistic instantaneous product save & delete
+  const saveProduct = async (
+    payload: Omit<Product, 'id'>,
+    existingId?: string
+  ): Promise<string> => {
+    if (existingId) {
+      // 1. Instant local update (0ms latency for UI)
+      setProducts((prev) =>
+        prev.map((p) => (p.id === existingId ? { ...payload, id: existingId } : p))
+      );
+      // 2. Background Firestore synchronization
+      updateProductInDb(existingId, payload).catch((err) => {
+        console.error('Failed to update product in database:', err);
+      });
+      return existingId;
+    } else {
+      // Create new product - Instantaneous 0ms optimistic update
+      const tempId = `prod_${Date.now()}`;
+      setProducts((prev) => [{ ...payload, id: tempId }, ...prev]);
+
+      // Background Firestore synchronization
+      addProductToDb(payload)
+        .then((realId) => {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === tempId ? { ...payload, id: realId } : p))
+          );
+        })
+        .catch((err) => {
+          console.error('Failed to persist new product to database in background:', err);
+        });
+
+      return tempId;
+    }
+  };
+
+  const deleteProduct = async (id: string): Promise<void> => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    deleteProductFromDb(id).catch((err) => {
+      console.error('Failed to delete product from database:', err);
+    });
+  };
+
   const placeOrder = async (
     orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>
   ): Promise<string> => {
@@ -782,6 +829,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateOrderExchangeStatus,
         seedCatalog,
         purgeAndResetChopper,
+        saveProduct,
+        deleteProduct,
         refreshProducts,
         refreshOrders,
         reviews,

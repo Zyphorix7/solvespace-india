@@ -814,6 +814,85 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                   </div>
                 </div>
 
+                {/* SS AI Product Assistant Card (Interactive Gemini 3.8 Integration) */}
+                <div className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-[#0B2545] text-white border border-white/15 shadow-lg relative overflow-hidden space-y-3">
+                  {/* Subtle Glowing Background Accent */}
+                  <div className="pointer-events-none absolute -top-8 -right-8 w-32 h-32 bg-[#FF5A36]/25 rounded-full blur-2xl" />
+
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FF5A36] to-amber-400 p-[1.5px] shadow-[0_0_12px_rgba(255,90,54,0.4)] shrink-0">
+                        <div className="w-full h-full bg-slate-950/80 rounded-[10px] flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs sm:text-sm font-extrabold tracking-wide text-white">SS AI Assistant</span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 shrink-0">
+                            Live
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-300/80 font-medium truncate">
+                          Ask anything about this product or setup
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent('open-ss-ai', {
+                            detail: {
+                              question: `Tell me all key features, motor specs, and how to use the ${product.title}.`,
+                              mode: 'chopper',
+                            },
+                          })
+                        );
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-[#FF5A36] hover:bg-[#E04826] text-white text-[11px] font-bold shadow-md shadow-orange-500/20 flex items-center gap-1 transition-all active:scale-95 cursor-pointer shrink-0"
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-200" />
+                      <span>Ask SS AI</span>
+                    </button>
+                  </div>
+
+                  {/* Interactive Quick-Prompt Chips */}
+                  <div className="space-y-1.5 relative z-10">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Frequently Asked by Customers:
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {[
+                        '⚡ How fast does it mince garlic & onions?',
+                        '🔋 Battery runtime & USB charging time?',
+                        '💧 How to clean the 304 blades safely?',
+                        '📦 What is included inside the box?',
+                      ].map((promptText, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            window.dispatchEvent(
+                              new CustomEvent('open-ss-ai', {
+                                detail: {
+                                  question: `Regarding ${product.title}: ${promptText.replace(/^[^\s]+\s/, '')}`,
+                                  mode: 'chopper',
+                                },
+                              })
+                            );
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 hover:border-amber-400/40 text-[10px] text-slate-200 text-left transition-all active:scale-98 cursor-pointer truncate"
+                          title={promptText}
+                        >
+                          {promptText}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Collapsible Product Details Accordion */}
                 <div className="border-t border-slate-200 pt-3 space-y-2">
                   {/* Features */}

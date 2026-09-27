@@ -40,12 +40,21 @@ export const GeminiChatbot: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Global event listener to open SS AI from anywhere in the app
+  // Global event listener to open SS AI from anywhere in the app with question/mode support
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = (e?: Event) => {
+      const customEvent = e as CustomEvent<{ question?: string; mode?: AIMode }>;
+      setIsOpen(true);
+      if (customEvent?.detail?.mode) {
+        setActiveMode(customEvent.detail.mode);
+      }
+      if (customEvent?.detail?.question) {
+        handleSend(customEvent.detail.question);
+      }
+    };
     window.addEventListener('open-ss-ai', handleOpen);
     return () => window.removeEventListener('open-ss-ai', handleOpen);
-  }, []);
+  }, [products]);
 
   useEffect(() => {
     if (isOpen) {
@@ -182,7 +191,7 @@ export const GeminiChatbot: React.FC = () => {
   return (
     <>
       {/* Ultra-Premium Glassmorphism Floating Action Launcher */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
+      <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40">
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
@@ -225,57 +234,58 @@ export const GeminiChatbot: React.FC = () => {
             aria-hidden="true"
           />
 
-          <div className="fixed inset-x-0 bottom-0 z-50 h-[88dvh] max-h-[88dvh] sm:h-[620px] sm:max-h-[85vh] sm:w-[440px] md:w-[460px] sm:bottom-6 sm:right-6 sm:inset-x-auto sm:top-auto bg-slate-950/90 backdrop-blur-3xl backdrop-saturate-200 rounded-t-[28px] sm:rounded-[28px] shadow-[0_-12px_45px_rgba(0,0,0,0.6),0_30px_70px_-10px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25),inset_0_-1px_1px_rgba(0,0,0,0.5),0_0_35px_rgba(255,90,54,0.18)] border-t sm:border border-white/20 flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+          <div className="gemini-chat-window fixed inset-x-0 bottom-0 z-50 h-[88dvh] max-h-[88dvh] sm:bottom-4 sm:right-4 sm:inset-x-auto sm:top-auto sm:w-[430px] md:w-[450px] max-w-[100vw] sm:max-w-[calc(100vw-2rem)] sm:h-[min(580px,calc(100dvh-2rem))] sm:max-h-[calc(100dvh-2rem)] bg-slate-950/95 backdrop-blur-3xl backdrop-saturate-200 rounded-t-[28px] sm:rounded-[28px] shadow-[0_-12px_45px_rgba(0,0,0,0.6),0_30px_70px_-10px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25),inset_0_-1px_1px_rgba(0,0,0,0.5),0_0_35px_rgba(255,90,54,0.18)] border-t sm:border border-white/20 grid grid-rows-[auto_auto_minmax(0,1fr)_auto_auto] min-h-0 min-w-0 overflow-hidden animate-in slide-in-from-bottom duration-300">
             
-            {/* Mobile Drag Indicator */}
-            <div className="w-12 h-1 rounded-full bg-white/30 mx-auto mt-2 sm:hidden shrink-0" />
-
             {/* Ambient Lighting Orbs behind Frosted Glass */}
             <div className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 bg-gradient-to-br from-[#FF5A36]/25 to-amber-500/20 rounded-full blur-3xl" />
             <div className="pointer-events-none absolute top-1/3 -left-20 w-48 h-48 bg-gradient-to-tr from-blue-600/15 to-indigo-500/15 rounded-full blur-3xl" />
             <div className="pointer-events-none absolute -bottom-10 -right-10 w-48 h-48 bg-gradient-to-tl from-emerald-500/10 to-teal-500/15 rounded-full blur-2xl" />
 
             {/* Frosted Glass Header */}
-            <div className="px-3.5 py-2.5 sm:p-4 bg-white/[0.04] backdrop-blur-xl border-b border-white/10 text-white flex items-center justify-between relative z-10 shadow-[0_4px_20px_rgba(0,0,0,0.15)] shrink-0">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="relative">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#FF5A36] via-[#FF7555] to-amber-400 p-[1.5px] shadow-[0_0_16px_rgba(255,90,54,0.35)]">
-                    <div className="w-full h-full bg-slate-950/80 backdrop-blur-md rounded-[14px] flex items-center justify-center text-[#FF5A36] border border-white/10">
-                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 animate-pulse" />
+            <div className="bg-slate-900/95 backdrop-blur-xl border-b border-white/10 text-white relative z-20 shadow-[0_4px_20px_rgba(0,0,0,0.15)] shrink-0 min-w-0">
+              {/* Mobile Drag Indicator */}
+              <div className="w-12 h-1 rounded-full bg-white/30 mx-auto mt-2 sm:hidden shrink-0" />
+              <div className="px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between min-h-[52px]">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <div className="relative shrink-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-[#FF5A36] via-[#FF7555] to-amber-400 p-[1.5px] shadow-[0_0_16px_rgba(255,90,54,0.35)]">
+                    <div className="w-full h-full bg-slate-950/80 backdrop-blur-md rounded-[13px] flex items-center justify-center text-[#FF5A36] border border-white/10">
+                      <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
                     </div>
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400 border-2 border-slate-900 shadow-[0_0_6px_#34d399]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 border-2 border-slate-900 shadow-[0_0_6px_#34d399]" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <h4 className="text-xs sm:text-sm font-extrabold tracking-wide text-white drop-shadow-xs">SS AI Studio</h4>
-                    <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15 backdrop-blur-md shadow-xs">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="text-xs sm:text-sm font-extrabold tracking-wide text-white drop-shadow-xs truncate">SS AI Assistant</h4>
+                    <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-white/10 text-slate-200 border border-white/15 backdrop-blur-md shadow-xs">
                       Gemini 3.8
                     </span>
                   </div>
-                  <p className="text-[9px] sm:text-[10px] text-slate-300/80 font-medium">
-                    Product Expert & Smart Tech Assistant
+                  <p className="text-[9px] sm:text-[10px] text-slate-300/80 font-medium truncate">
+                    Product Expert & Tech Consultant
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
                 <button
                   onClick={handleReset}
                   title="Reset Conversation"
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 backdrop-blur-md transition-all cursor-pointer shadow-xs active:scale-95"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 backdrop-blur-md transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
                   aria-label="Reset Chat"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <RefreshCw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 backdrop-blur-md transition-all cursor-pointer shadow-xs active:scale-95"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 backdrop-blur-md transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
                   aria-label="Close Chat"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
+            </div>
             </div>
 
             {/* Mode Navigation Frosted Pills */}
@@ -327,7 +337,7 @@ export const GeminiChatbot: React.FC = () => {
           </div>
 
           {/* Messages Thread with Glassmorphism Bubbles */}
-          <div className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-4 space-y-3.5 bg-transparent text-xs relative z-10 min-h-0">
+          <div className="overflow-y-auto overscroll-contain p-3.5 sm:p-4 space-y-3.5 bg-transparent text-xs relative z-10 min-h-0 min-w-0 max-w-full">
             {messages.map((m, idx) => {
               const { cleanText, recommended } =
                 m.role === 'assistant'
@@ -367,7 +377,7 @@ export const GeminiChatbot: React.FC = () => {
 
                   {/* Interactive Recommended Product Frosted Glass Cards */}
                   {recommended.length > 0 && (
-                    <div className="w-full pl-9 pr-2 space-y-2 mt-1">
+                    <div className="w-full pl-0 sm:pl-9 pr-1 sm:pr-2 space-y-2 mt-1 min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-[#FF5A36] flex items-center gap-1">
                         <Sparkles className="w-3 h-3" />
                         <span>Recommended Workspace Gear</span>
@@ -376,12 +386,12 @@ export const GeminiChatbot: React.FC = () => {
                         {recommended.map((product) => (
                           <div
                             key={product.id}
-                            className="p-2.5 bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-xl border border-white/15 hover:border-[#FF5A36]/60 rounded-2xl flex items-center gap-3 transition-all shadow-[0_8px_20px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] group"
+                            className="p-2.5 bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-xl border border-white/15 hover:border-[#FF5A36]/60 rounded-2xl flex items-center gap-2.5 sm:gap-3 transition-all shadow-[0_8px_20px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] group min-w-0"
                           >
                             <img
                               src={product.images[0]}
                               alt={product.title}
-                              className="w-13 h-13 object-cover rounded-xl border border-white/15 bg-slate-800 shrink-0 shadow-xs"
+                              className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-xl border border-white/15 bg-slate-800 shrink-0 shadow-xs"
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 text-[10px] text-slate-300">

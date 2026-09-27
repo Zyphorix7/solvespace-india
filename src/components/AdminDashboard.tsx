@@ -110,6 +110,8 @@ export const AdminDashboard: React.FC = () => {
     updateOrderStatus,
     updateOrderExchangeStatus,
     quickUpdateStock,
+    saveProduct,
+    deleteProduct,
     showToast,
     formatCurrency,
   } = useStore();
@@ -286,22 +288,19 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(true);
   };
 
-  // Save product in CMS
+  // Instant Save product in CMS
   const handleSaveProduct = async (payload: Omit<Product, 'id'>, existingId?: string) => {
-    if (existingId) {
-      await updateProductInDb(existingId, payload);
-    } else {
-      await addProductToDb(payload);
-    }
     setIsProductModalOpen(false);
     setEditingProduct(null);
-    await refreshProducts();
+    showToast(existingId ? 'Product updated successfully!' : 'New product created and live in catalog!', 'success');
+    await saveProduct(payload, existingId);
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      await deleteProductFromDb(id);
-      await refreshProducts();
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+      await deleteProduct(id);
       showToast('Product removed from catalog', 'info');
     }
   };
@@ -333,37 +332,37 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-0 sm:p-3 md:p-6 font-sans">
-      {/* Admin Window Frame */}
-      <div className="w-full max-w-[1500px] h-[100dvh] max-h-[100dvh] sm:h-[95vh] sm:max-h-[95vh] bg-[#F7F8FA] sm:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden text-slate-900 border border-slate-200">
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex flex-col p-0 sm:p-2 md:p-3 font-sans overflow-hidden">
+      {/* Admin Window Frame - Strict containment ensures top bar is always visible */}
+      <div className="admin-container w-full max-w-[1500px] h-full max-h-[100dvh] sm:max-h-[calc(100dvh-1.5rem)] mx-auto bg-[#F7F8FA] sm:rounded-2xl shadow-2xl overflow-hidden text-slate-900 border border-slate-200 min-h-0 min-w-0 max-w-[100vw] grid grid-cols-1 md:grid-cols-[16rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] md:grid-rows-1">
         
         {/* LEFT EXPANDED/COLLAPSIBLE SIDEBAR */}
-        <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-2.5 sm:p-4 flex md:flex-col justify-between shrink-0 shadow-2xs z-20">
-          <div className="flex md:flex-col items-center md:items-stretch gap-2.5 sm:gap-4 w-full">
+        <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-2 sm:p-3 md:p-4 flex flex-col justify-between shrink-0 shadow-2xs z-20 md:overflow-y-auto min-h-0 min-w-0 max-w-full">
+          <div className="flex flex-col items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
             {/* SolveSpace India Brand Header */}
-            <div className="flex items-center justify-between pb-1.5 md:pb-4 md:border-b border-slate-100 w-full">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between pb-2 md:pb-4 border-b border-slate-100 w-full shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#0B2545] text-white flex items-center justify-center shadow-md shrink-0">
                   <SolveSpaceLogo variant="icon" size="xs" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs sm:text-sm font-black tracking-tight text-slate-900">SolveSpace</span>
-                    <span className="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#F58220] text-white tracking-widest uppercase">
+                    <span className="text-xs sm:text-sm font-black tracking-tight text-slate-900 truncate">SolveSpace</span>
+                    <span className="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#F58220] text-white tracking-widest uppercase shrink-0">
                       IN
                     </span>
                   </div>
-                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
                     Admin Console
                   </p>
                 </div>
               </div>
 
               {/* Mobile quick actions: Storefront & Sign Out */}
-              <div className="flex md:hidden items-center gap-1.5">
+              <div className="flex md:hidden items-center gap-1.5 shrink-0">
                 <button
                   onClick={closeAdmin}
-                  className="px-2.5 py-1.5 rounded-lg flex items-center gap-1 text-slate-700 bg-slate-100 hover:bg-slate-200 text-xs font-bold transition-colors cursor-pointer active:scale-95"
+                  className="px-2.5 py-1.5 rounded-lg flex items-center gap-1 text-slate-700 bg-slate-100 hover:bg-slate-200 text-xs font-bold transition-colors cursor-pointer active:scale-95 shrink-0"
                   title="Return to Customer Storefront"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
@@ -371,7 +370,7 @@ export const AdminDashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={logoutAdmin}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer active:scale-95"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer active:scale-95 shrink-0"
                   title="Sign Out of Admin Console"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -380,7 +379,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Navigation Tabs with Icons AND Labels */}
-            <nav className="flex md:flex-col items-center md:items-stretch gap-1.5 w-full overflow-x-auto md:overflow-visible pb-1 md:pb-0 no-scrollbar">
+            <nav className="flex md:flex-col items-center md:items-stretch gap-1.5 w-full overflow-x-auto md:overflow-visible pb-1 md:pb-0 no-scrollbar touch-pan-x shrink-0">
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
                 {
@@ -481,9 +480,9 @@ export const AdminDashboard: React.FC = () => {
         </aside>
 
         {/* MAIN BODY AREA */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#F7F8FA] overflow-hidden">
+        <div className="flex-1 min-w-0 bg-[#F7F8FA] overflow-hidden min-h-0 max-w-full grid grid-rows-[auto_minmax(0,1fr)]">
           {/* TOP BAR WITH LIVE SEARCH & CONTROLS */}
-          <header className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 sticky top-0 z-10 shadow-2xs">
+          <header className="bg-white border-b border-slate-200/80 px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 sticky top-0 z-10 shadow-2xs shrink-0 min-h-[56px]">
             {/* Functional Search Bar */}
             <div className="flex-1 max-w-md relative flex items-center">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
@@ -511,12 +510,22 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Right Action Tools */}
-            <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Quick Add Product Button */}
+              <button
+                onClick={openNewProductModal}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 bg-[#0B2545] hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all shrink-0"
+                title="Add New Product to Catalog"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Add Product</span>
+              </button>
+
               {/* Notification Bell with Dropdown */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   onClick={() => setNotificationOpen(!notificationOpen)}
-                  className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 relative cursor-pointer active:scale-95 transition-all"
+                  className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 relative cursor-pointer active:scale-95 transition-all shrink-0"
                   title="Alerts & Notifications"
                 >
                   <Bell className="w-4 h-4 text-slate-600" />
@@ -595,37 +604,11 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
-
-              {/* Quick Add Product Button */}
-              <button
-                onClick={openNewProductModal}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-[#0B2545] hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Product</span>
-              </button>
-
-              {/* Storefront return link & Logout for Mobile */}
-              <button
-                onClick={closeAdmin}
-                className="px-2.5 py-1.5 rounded-lg flex md:hidden items-center gap-1 text-slate-700 bg-slate-100 hover:bg-slate-200 text-xs font-bold"
-                title="Return to Customer Storefront"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Store</span>
-              </button>
-              <button
-                onClick={logoutAdmin}
-                className="w-8 h-8 rounded-lg flex md:hidden items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100"
-                title="Sign Out of Admin Console"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
             </div>
           </header>
 
           {/* VIEWPORT CONTENT CONTAINER */}
-          <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+          <div className="overflow-y-auto overscroll-contain p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 pb-[max(2rem,env(safe-area-inset-bottom))] min-w-0 min-h-0 max-w-full">
             
             {/* TAB 1: DASHBOARD OVERVIEW */}
             {activeTab === 'dashboard' && (
@@ -659,7 +642,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* KPI CARDS (All formatted in ₹ INR) */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   {/* Total Revenue */}
                   <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
                     <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
@@ -775,7 +758,7 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="h-52 w-full pt-2">
+                    <div className="h-52 w-full pt-2 min-w-0">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={overviewAnalytics.dailyMetrics} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                           <defs>
@@ -1054,8 +1037,8 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
+                    <div className="overflow-x-auto -mx-1 sm:mx-0">
+                      <table className="w-full min-w-[640px] text-left text-xs">
                         <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase border-b border-slate-200">
                           <tr>
                             <th className="p-3.5">Product</th>
@@ -1224,8 +1207,8 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
+                    <div className="overflow-x-auto -mx-1 sm:mx-0">
+                      <table className="w-full min-w-[720px] text-left text-xs">
                         <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase border-b border-slate-200">
                           <tr>
                             <th className="p-3.5">Order ID & Date</th>

@@ -238,7 +238,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
       </div>
 
       {/* 2. CORE KPI PERFORMANCE CARDS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Revenue */}
         <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
@@ -364,7 +364,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         </div>
 
         {/* Recharts Area / Bar Chart Container */}
-        <div className="w-full h-72 sm:h-80 pt-2">
+        <div className="w-full h-72 sm:h-80 pt-2 min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
@@ -458,7 +458,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
             </span>
           </div>
 
-          <div className="w-full h-64 pt-2">
+          <div className="w-full h-64 pt-2 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
