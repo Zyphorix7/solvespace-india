@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>SolveSpace India</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Workstation Not Found | SolveSpace India</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
-      // This script takes the current url and converts the path and query
-      // into just a query string, and then redirects the browser
-      // to the new url with only a query string and hash fragment.
-      // Automatically detect if running in a GitHub Pages repository subfolder or custom/user root domain
       var segments = window.location.pathname.split('/').filter(Boolean);
       var isRepoSubfolder = window.location.hostname.endsWith('github.io') && segments.length >= 1;
       var pathSegmentsToKeep = isRepoSubfolder ? 1 : 0;
@@ -24,7 +22,79 @@
         l.hash
       );
     </script>
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #0B2545;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      .card {
+        max-width: 480px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 40px 32px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+      .num {
+        font-size: 72px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -2px;
+        color: #FF5A36;
+        margin-bottom: 12px;
+      }
+      .tag {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #94A3B8;
+        margin-bottom: 16px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 0 12px 0;
+        line-height: 1.3;
+      }
+      p {
+        font-size: 14px;
+        color: #CBD5E1;
+        line-height: 1.6;
+        margin: 0 0 28px 0;
+      }
+      .btn {
+        display: inline-block;
+        background: #FF5A36;
+        color: #FFFFFF;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+        padding: 12px 28px;
+        border-radius: 12px;
+        transition: background 0.2s ease;
+      }
+      .btn:hover {
+        background: #E04826;
+      }
+    </style>
   </head>
   <body>
+    <div class="card">
+      <div class="num">404</div>
+      <div class="tag">Error 404 · SolveSpace India</div>
+      <h1>Workstation Not Found</h1>
+      <p>The component, blueprint, or page URL you requested is not active. Redirecting you to the catalog...</p>
+      <a href="./" class="btn">Return to Storefront</a>
+    </div>
   </body>
 </html>
