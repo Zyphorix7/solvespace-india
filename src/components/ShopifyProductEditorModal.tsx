@@ -623,7 +623,7 @@ export const ShopifyProductEditorModal: React.FC<ShopifyProductEditorModalProps>
   return (
     <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 overflow-y-auto">
       {/* Main Container - Shopify Polaris Style */}
-      <div className="w-full max-w-6xl bg-[#F8FAFC] sm:rounded-3xl shadow-2xl border border-slate-200/90 text-slate-800 flex flex-col max-h-[96vh] overflow-hidden my-auto animate-in fade-in-50 zoom-in-95 duration-150">
+      <div className="w-full max-w-6xl bg-[#F8FAFC] h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[95dvh] sm:rounded-3xl shadow-2xl border border-slate-200/90 text-slate-800 flex flex-col overflow-hidden my-auto animate-in fade-in-50 zoom-in-95 duration-150">
         {/* SHOPIFY TOP HEADER BAR */}
         <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
@@ -1657,7 +1657,7 @@ export const ShopifyProductEditorModal: React.FC<ShopifyProductEditorModalProps>
         </div>
 
         {/* STICKY BOTTOM SAVE/DISCARD BAR */}
-        <div className="bg-white border-t border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 shadow-xs">
+        <div className="bg-white border-t border-slate-200 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between shrink-0 shadow-xs">
           <div className="text-xs text-slate-400 font-medium hidden sm:block">
             {images.length}/10 images selected • {hasVariants ? `${variants.length} active variants` : 'Single default variant'}
           </div>

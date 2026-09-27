@@ -335,28 +335,47 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-0 sm:p-3 md:p-6 font-sans">
       {/* Admin Window Frame */}
-      <div className="w-full max-w-[1500px] h-full sm:h-[95vh] bg-[#F7F8FA] sm:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden text-slate-900 border border-slate-200">
+      <div className="w-full max-w-[1500px] h-[100dvh] max-h-[100dvh] sm:h-[95vh] sm:max-h-[95vh] bg-[#F7F8FA] sm:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden text-slate-900 border border-slate-200">
         
         {/* LEFT EXPANDED/COLLAPSIBLE SIDEBAR */}
-        <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-4 flex md:flex-col justify-between shrink-0 shadow-2xs z-20">
-          <div className="flex md:flex-col items-center md:items-stretch gap-4 w-full">
+        <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-2.5 sm:p-4 flex md:flex-col justify-between shrink-0 shadow-2xs z-20">
+          <div className="flex md:flex-col items-center md:items-stretch gap-2.5 sm:gap-4 w-full">
             {/* SolveSpace India Brand Header */}
-            <div className="flex items-center justify-between pb-2 md:pb-4 md:border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-[#0B2545] text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="flex items-center justify-between pb-1.5 md:pb-4 md:border-b border-slate-100 w-full">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#0B2545] text-white flex items-center justify-center shadow-md shrink-0">
                   <SolveSpaceLogo variant="icon" size="xs" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-black tracking-tight text-slate-900">SolveSpace</span>
-                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#F58220] text-white tracking-widest uppercase">
+                    <span className="text-xs sm:text-sm font-black tracking-tight text-slate-900">SolveSpace</span>
+                    <span className="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#F58220] text-white tracking-widest uppercase">
                       IN
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     Admin Console
                   </p>
                 </div>
+              </div>
+
+              {/* Mobile quick actions: Storefront & Sign Out */}
+              <div className="flex md:hidden items-center gap-1.5">
+                <button
+                  onClick={closeAdmin}
+                  className="px-2.5 py-1.5 rounded-lg flex items-center gap-1 text-slate-700 bg-slate-100 hover:bg-slate-200 text-xs font-bold transition-colors cursor-pointer active:scale-95"
+                  title="Return to Customer Storefront"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Store</span>
+                </button>
+                <button
+                  onClick={logoutAdmin}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer active:scale-95"
+                  title="Sign Out of Admin Console"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
 
@@ -388,19 +407,19 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
+                    className={`flex items-center justify-between px-2.5 py-1.5 md:px-3.5 md:py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
                       isActive
                         ? 'bg-[#0B2545] text-white shadow-md shadow-slate-900/15'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-[#F58220]' : 'text-slate-400'}`} />
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isActive ? 'text-[#F58220]' : 'text-slate-400'}`} />
                       <span className="whitespace-nowrap">{item.label}</span>
                     </div>
                     {item.badge !== null && (
                       <span
-                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                        className={`text-[9px] md:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ml-1.5 ${
                           isActive
                             ? 'bg-white/20 text-white'
                             : (item as any).badgeColor || 'bg-slate-100 text-slate-600'
@@ -417,17 +436,17 @@ export const AdminDashboard: React.FC = () => {
               <button
                 onClick={handleLoadInsights}
                 disabled={isLoadingInsights}
-                className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs text-purple-700 bg-purple-50 hover:bg-purple-100 transition-all cursor-pointer shrink-0 mt-1"
+                className="flex items-center justify-between px-2.5 py-1.5 md:px-3.5 md:py-2.5 rounded-xl font-bold text-xs text-purple-700 bg-purple-50 hover:bg-purple-100 transition-all cursor-pointer shrink-0"
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   {isLoadingInsights ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                    <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin text-purple-600" />
                   ) : (
-                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-600" />
                   )}
                   <span>Run AI Audit</span>
                 </div>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-200/60 text-purple-800">
+                <span className="text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-200/60 text-purple-800 ml-1.5">
                   Gemini
                 </span>
               </button>
@@ -606,7 +625,7 @@ export const AdminDashboard: React.FC = () => {
           </header>
 
           {/* VIEWPORT CONTENT CONTAINER */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6">
+          <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
             
             {/* TAB 1: DASHBOARD OVERVIEW */}
             {activeTab === 'dashboard' && (
@@ -1828,7 +1847,7 @@ export const AdminDashboard: React.FC = () => {
       {/* ORDER DETAILS & DISPATCH MODAL */}
       {selectedOrderForDetails && (
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto border border-slate-200">
+          <div className="w-full max-w-2xl bg-white rounded-3xl p-4 sm:p-7 shadow-2xl space-y-5 sm:space-y-6 max-h-[90dvh] overflow-y-auto border border-slate-200 my-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-3">

@@ -15,8 +15,8 @@ export const ExchangePolicyModal: React.FC<ExchangePolicyModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="w-full max-w-xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-xl bg-white rounded-3xl p-4 sm:p-8 shadow-2xl relative space-y-5 sm:space-y-6 animate-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto my-auto">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">

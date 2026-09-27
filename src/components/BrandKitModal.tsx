@@ -129,7 +129,7 @@ export const BrandKitModal: React.FC<BrandKitModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden my-auto max-h-[90dvh] flex flex-col">
         {/* Header */}
         <div className="p-5 sm:p-6 bg-gradient-to-r from-[#0B2545] via-[#102F54] to-[#0B2545] text-white flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3.5">

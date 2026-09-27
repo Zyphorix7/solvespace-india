@@ -22,7 +22,7 @@ export const StickyMobileBuyBar: React.FC<StickyMobileBuyBarProps> = ({
   const currentPrice = selectedVariant?.price ?? product.price;
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-2.5 shadow-2xl safe-area-bottom">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] shadow-2xl">
       <div className="flex items-center justify-between gap-3">
         {/* Price & Variant Indicator */}
         <div className="flex flex-col min-w-0">

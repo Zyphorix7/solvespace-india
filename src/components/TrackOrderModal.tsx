@@ -63,8 +63,8 @@ export const TrackOrderModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white rounded-3xl p-5 sm:p-6 shadow-2xl relative space-y-5 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-lg bg-white rounded-3xl p-4 sm:p-6 shadow-2xl relative space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto my-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
